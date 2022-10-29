@@ -5,8 +5,9 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -21,8 +22,9 @@ public class LocalStorageImplementation extends StorageSpecification {
     here.add("C:\\Users\\cvlad\\Desktop\\SKProjekat\\LocalStorageImplementation\\p1\\2.txt");
     local.createFolderOnSpecifiedPath("", "dest");
     local.putFilesOnSpecifiedPath(here, "dest");
-//    local.deleteFileOrDirectory("cvele");
+    //local.deleteFileOrDirectory("cvele");
     local.moveFileFromDirectoryToAnother("dest\\2.txt", "cvele");
+    //local.downloadFileOrDirectory("cvele\\2.txt", "C:\\Users\\cvlad\\Downloads");
   }
 
   private String getFullStoragePath(String path) {
@@ -65,25 +67,31 @@ public class LocalStorageImplementation extends StorageSpecification {
     return false;
   }
 
-  @Override
-  boolean putFilesOnSpecifiedPath(List<String> listFiles, String path) {
-    File srcDir = new File(this.getFullStoragePath(path));
-    if (!srcDir.exists()) {
+  // Uploads a file "fileName" to a "path"
+  private boolean uploadFileToPath(String fileName, String path) {
+    File srcDir = new File(path);
+    if (!srcDir.exists() || !srcDir.isDirectory()) {
       System.out.println("Directory \"" + path + "\" doesn't exist.");
       return false;
     }
-    for (String filePath : listFiles) {
-      File source = new File(filePath);
-      if (!source.exists()) continue;
-      String fullPath = this.getFullStoragePath(path) + "\\\\" + source.getName();
-      File dest = new File(fullPath);
-      try {
-        FileUtils.copyFile(source, dest);
-      } catch (IOException e) {
-        System.out.println("Error while copying files.");
-      }
+    File source = new File(fileName);
+    if (!source.exists()) return false;
+    String destPath = path + "\\\\" + source.getName();
+    File dest = new File(destPath);
+    try {
+      FileUtils.copyFile(source, dest);
+    } catch (IOException e) {
+      System.out.println("Error while uploading files.");
     }
-    return false;
+    return true;
+  }
+
+  @Override
+  boolean putFilesOnSpecifiedPath(List<String> listFiles, String path) {
+    for (String filePath : listFiles) {
+      this.uploadFileToPath(filePath, this.getFullStoragePath(path));
+    }
+    return true;
   }
 
   @Override
@@ -102,24 +110,28 @@ public class LocalStorageImplementation extends StorageSpecification {
     String fullFilePath = this.getFullStoragePath(filePath);
     String fullPathTo = this.getFullStoragePath(pathTo);
 
-    System.out.println(super.getRootFolderPath());
-    System.out.println(fullFilePath);
-    System.out.println(fullPathTo);
-
     File file = new File(fullFilePath);
-    System.out.println(file.getName());
     if (!file.isFile()) {
-      System.out.println("Not a file type.");
+      System.out.println(fullFilePath + " is not a file type.");
       return false;
     }
-    if (file.renameTo(new File(fullPathTo))) {
-      if (file.delete()) {
-        System.out.println("File moved successfully.");
-        return true;
-      } else {
-        System.out.println("Error while moving a file.");
-        return false;
-      }
+
+    File fileTo = new File(fullPathTo);
+    if (!fileTo.exists()) {
+      System.out.println("Destination " + fullPathTo + " doesn't exist.");
+      return false;
+    }
+    if (!fileTo.isDirectory()) {
+      System.out.println("Not a directory destination.");
+      return false;
+    }
+
+    fullPathTo += "\\\\" + file.getName();
+    fileTo = new File(fullPathTo);
+
+    if (file.renameTo(fileTo)) {
+      System.out.println("File moved successfully.");
+      return true;
     } else {
       System.out.println("Error while moving a file.");
       return false;
@@ -127,47 +139,63 @@ public class LocalStorageImplementation extends StorageSpecification {
   }
 
   @Override
-  void downloadFileOrDirectory(String s, String s1) {
+  void downloadFileOrDirectory(String pathFrom, String pathTo) {
+    String fullPathFrom = this.getFullStoragePath(pathFrom);
+    this.uploadFileToPath(fullPathFrom, pathTo);
+  }
+
+  @Override
+  void renameFileOrDirectory(String pathFrom, String pathTo) {
 
   }
 
   @Override
-  void renameFileOrDirectory(String s, String s1) {
-
-  }
-
-  @Override
-  HashMap<String, FileMetadata> filesFromDirectory(String s) {
+  Map<String, FileMetadata> filesFromDirectory(String s) {
     return null;
   }
 
   @Override
-  HashMap<String, FileMetadata> filesFromChildrenDirectory(String s) {
+  Map<String, FileMetadata> filesFromChildrenDirectory(String s) {
     return null;
   }
 
   @Override
-  HashMap<String, FileMetadata> allFilesFromDirectoryAndSubdirectory(String s) {
+  Map<String, FileMetadata> allFilesFromDirectoryAndSubdirectory(String s) {
     return null;
   }
 
   @Override
-  HashMap<String, String> filesFromDirectoryExt(String s, List<String> list) {
+  Map<String, FileMetadata> filesFromDirectoryExt(String s, List<String> list) {
     return null;
   }
 
   @Override
-  HashMap<String, String> filesFromChildrenDirectoryExt(String s, List<String> list) {
+  Map<String, FileMetadata> filesFromChildrenDirectoryExt(String s, List<String> list) {
     return null;
   }
 
   @Override
-  HashMap<String, String> allFilesFromDirectoryAndSubdirectoryExt(String s, List<String> list) {
+  Map<String, FileMetadata> allFilesFromDirectoryAndSubdirectoryExt(String s, List<String> list) {
     return null;
   }
 
   @Override
-  HashMap<String, String> filesFromDirectorySubstring(String s, String s1) {
+  Map<String, FileMetadata> filesFromDirectorySubstring(String s, String s1) {
+    return null;
+  }
+
+  @Override
+  Map<String, FileMetadata> filesFromChildrenDirectorySubstring(String s, String s1) {
+    return null;
+  }
+
+  @Override
+  Map<String, FileMetadata> filesFromDirectoryAndSubdirectorySubstring(String s, String s1) {
+    return null;
+  }
+
+  @Override
+  String doesDiretoryContainsFiles(String s, List<String> list) {
     return null;
   }
 
@@ -177,7 +205,27 @@ public class LocalStorageImplementation extends StorageSpecification {
   }
 
   @Override
-  List<String> returnFilesInDateInterval(String s, Date date, Date date1) {
+  Map<String, FileMetadata> sortFilesByName(Map<String, FileMetadata> hashMap, boolean b) {
+    return null;
+  }
+
+  @Override
+  Map<String, FileMetadata> sortFilesByCreatedDate(Map<String, FileMetadata> hashMap, boolean b) {
+    return null;
+  }
+
+  @Override
+  Map<String, FileMetadata> sortFilesBySize(Map<String, FileMetadata> hashMap, boolean b) {
+    return null;
+  }
+
+  @Override
+  Map<String, FileMetadata> returnCreatedFilesInDateInterval(String s, Date date, Date date1) {
+    return null;
+  }
+
+  @Override
+  Map<String, FileMetadata> returnModifiedFilesInDateInterval(String s, Date date, Date date1) {
     return null;
   }
 }

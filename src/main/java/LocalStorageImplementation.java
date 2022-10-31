@@ -4,6 +4,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 
 public class LocalStorageImplementation extends StorageSpecification {
   private Map<String, FileMetadata> map = new HashMap<>();
+  private String storageName = "Skladiste";
 
   public static void main(String[] args) {
     LocalStorageImplementation local = new LocalStorageImplementation();
@@ -54,17 +56,42 @@ public class LocalStorageImplementation extends StorageSpecification {
   }
 
   private String getFullStoragePath(String path) {
-    return super.getRootFolderPath() + (path.length() > 0 ? "\\\\" + path : "");
+    return super.getRootFolderPath() + "\\\\" + this.storageName + (path.length() > 0 ? "\\\\" + path : "");
+  }
+
+  private void createConfigurationFile(String fullPath) {
+    String destPath = fullPath + "\\\\" + "configuration.txt";
+    File dest = new File(destPath);
+    try {
+      FileWriter myWriter = new FileWriter(dest.getAbsolutePath());
+      myWriter.write(super.getConfiguration().toString());
+      myWriter.close();
+    } catch (IOException e) {
+      System.out.println("An error occurred while creating a configuration file.");
+    }
   }
 
   @Override
   void createRootFolder() {
-//    File rootFile = new File(super.getRootFolderPath()); //TODO
-    File rootFile = new File("C:\\Users\\cvlad\\Desktop\\SKProjekat\\LocalStorageImplementation\\proba");
+    //super.setRootFolderPath("C:\\Users\\cvlad\\Desktop\\SKProjekat\\LocalStorageImplementation");
+    File rootFile = new File(super.getRootFolderPath() + "\\\\" + this.storageName);
+    boolean hasConfiguration = false;
+    if (super.getRootFolderPath().length() > 0) {
+      File[] files = Objects.requireNonNull(new File(super.getRootFolderPath()).listFiles());
+      for (File f : files) {
+        if (f.getName().equalsIgnoreCase(this.storageName)) {
+          hasConfiguration = true;
+          break;
+        }
+      }
+    }
+    System.out.println("Has configuration " + hasConfiguration);
     boolean created = rootFile.mkdir();
-    if (created) {
+    if (hasConfiguration) {
+      System.out.println("Root folder already exists.");
+    } else if (created) {
       System.out.println("Root folder successfully created.");
-      super.setRootFolderPath(rootFile.getAbsolutePath());
+      this.createConfigurationFile(rootFile.getAbsolutePath());
     } else {
       System.out.println("Error during creation root file.");
     }
@@ -223,7 +250,7 @@ public class LocalStorageImplementation extends StorageSpecification {
     }
   }
 
-  private boolean isInitialSearchingFileDirectory(String fullPath) {
+  private boolean initialFileDirectoryError(String fullPath) {
     this.map.clear();
     File sourceFolder = new File(fullPath);
     if (!sourceFolder.exists()) {
@@ -239,7 +266,7 @@ public class LocalStorageImplementation extends StorageSpecification {
   @Override
   Map<String, FileMetadata> filesFromDirectory(String path) {
     String fullPath = this.getFullStoragePath(path);
-    if (this.isInitialSearchingFileDirectory(fullPath)) return null;
+    if (this.initialFileDirectoryError(fullPath)) return null;
     this.addFilesFromDirectoryToMap(fullPath);
     return this.map;
   }
@@ -247,7 +274,7 @@ public class LocalStorageImplementation extends StorageSpecification {
   @Override
   Map<String, FileMetadata> filesFromChildrenDirectory(String path) {
     String fullPath = this.getFullStoragePath(path);
-    if (this.isInitialSearchingFileDirectory(fullPath)) return null;
+    if (this.initialFileDirectoryError(fullPath)) return null;
     File[] files = Objects.requireNonNull(new File(fullPath).listFiles());
     for (File f : files) {
       if (!f.isDirectory()) continue;
@@ -269,7 +296,7 @@ public class LocalStorageImplementation extends StorageSpecification {
   @Override
   Map<String, FileMetadata> allFilesFromDirectoryAndSubdirectory(String path) {
     String fullPath = this.getFullStoragePath(path);
-    if (this.isInitialSearchingFileDirectory(fullPath)) return null;
+    if (this.initialFileDirectoryError(fullPath)) return null;
     this.allFilesDfs(fullPath);
     for (String name : this.map.keySet()) {
       System.out.println(name);

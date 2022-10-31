@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -29,6 +30,7 @@ public class LocalStorageImplementation extends StorageSpecification {
     local.createFolderOnSpecifiedPath("cvele", "cvele2");
     local.moveFileFromDirectoryToAnother("dest\\2.txt", "cvele\\cvele2");
     local.moveFileFromDirectoryToAnother("dest\\1.txt", "cvele\\cvele2");
+    //System.out.println(local.folderNameByFileName("2.txt"));
 //    System.out.println("from dir: ");
 //    local.filesFromDirectory("cvele");
 //    System.out.println("from child dir: ");
@@ -44,6 +46,11 @@ public class LocalStorageImplementation extends StorageSpecification {
 //    local.createFolderOnSpecifiedPath("cvele\\cvele2", "cvele3");
 //    local.putFilesOnSpecifiedPath(here, "cvele\\cvele2\\cvele3");
 //    local.allFilesFromDirectoryAndSubdirectory("");
+
+//    List<String> here2 = new ArrayList<>();
+//    here2.add("1.txt");
+//    here2.add("2.txt");
+//    System.out.println(local.doesDirectoryContainFiles("cvele\\cvele2", here2));
   }
 
   private String getFullStoragePath(String path) {
@@ -179,6 +186,26 @@ public class LocalStorageImplementation extends StorageSpecification {
     }
   }
 
+  private FileTime returnCreationTime(File f) {
+    try {
+      BasicFileAttributes attr = Files.readAttributes(f.toPath(), BasicFileAttributes.class);
+      return attr.creationTime();
+    } catch (IOException ex) {
+      System.out.println("Error occurred during file search.");
+      return null;
+    }
+  }
+
+  private FileTime returnModificationTime(File f) {
+    try {
+      BasicFileAttributes attr = Files.readAttributes(f.toPath(), BasicFileAttributes.class);
+      return attr.lastModifiedTime();
+    } catch (IOException ex) {
+      System.out.println("Error occurred during file search.");
+      return null;
+    }
+  }
+
   private void addFilesFromDirectoryToMap(String fullPath) {
     File sourceFolder = new File(fullPath);
     if (!sourceFolder.exists() || !sourceFolder.isDirectory()) {
@@ -186,40 +213,33 @@ public class LocalStorageImplementation extends StorageSpecification {
       return;
     }
     File[] files = Objects.requireNonNull(new File(fullPath).listFiles());
-    FileTime creationTime = null;
-    FileTime modificationTime = null;
     for (File f : files) {
       if (f.isDirectory()) continue;
-      try {
-        BasicFileAttributes attr = Files.readAttributes(f.toPath(), BasicFileAttributes.class);
-        creationTime = attr.creationTime();
-        modificationTime = attr.lastModifiedTime();
-      } catch (IOException ex) {
-        System.out.println("Error occurred during file search.");
-      }
+      FileTime creationTime = returnCreationTime(f);
+      FileTime modificationTime = returnModificationTime(f);
       if (creationTime == null || modificationTime == null) continue;
       this.map.put(f.getName(), new FileMetadata(f.getAbsolutePath(), f.getTotalSpace(), new Date(creationTime.toMillis()),
               new Date(modificationTime.toMillis()), FilenameUtils.getExtension(f.getName()), f.getName()));
     }
   }
 
-  private boolean initialSearchingFileCheck(String fullPath) {
+  private boolean isInitialSearchingFileDirectory(String fullPath) {
     this.map.clear();
     File sourceFolder = new File(fullPath);
     if (!sourceFolder.exists()) {
       System.out.println(fullPath + " does not a exist.");
-      return false;
+      return true;
     }
     if (!sourceFolder.isDirectory()) {
       System.out.println(fullPath + " is not a directory.");
-      return false;
+      return true;
     }
-    return true;
+    return false;
   }
   @Override
   Map<String, FileMetadata> filesFromDirectory(String path) {
     String fullPath = this.getFullStoragePath(path);
-    if (!this.initialSearchingFileCheck(fullPath)) return null;
+    if (this.isInitialSearchingFileDirectory(fullPath)) return null;
     this.addFilesFromDirectoryToMap(fullPath);
     return this.map;
   }
@@ -227,7 +247,7 @@ public class LocalStorageImplementation extends StorageSpecification {
   @Override
   Map<String, FileMetadata> filesFromChildrenDirectory(String path) {
     String fullPath = this.getFullStoragePath(path);
-    if (!this.initialSearchingFileCheck(fullPath)) return null;
+    if (this.isInitialSearchingFileDirectory(fullPath)) return null;
     File[] files = Objects.requireNonNull(new File(fullPath).listFiles());
     for (File f : files) {
       if (!f.isDirectory()) continue;
@@ -249,7 +269,7 @@ public class LocalStorageImplementation extends StorageSpecification {
   @Override
   Map<String, FileMetadata> allFilesFromDirectoryAndSubdirectory(String path) {
     String fullPath = this.getFullStoragePath(path);
-    if (!this.initialSearchingFileCheck(fullPath)) return null;
+    if (this.isInitialSearchingFileDirectory(fullPath)) return null;
     this.allFilesDfs(fullPath);
     for (String name : this.map.keySet()) {
       System.out.println(name);
@@ -322,38 +342,95 @@ public class LocalStorageImplementation extends StorageSpecification {
     return this.map = this.createNewFilteredMap(list, false);
   }
 
+  // Vraca null ukoliko nije dobar path, vraca "Ne postoji takvi fajlovi u ovom folderu",
+  // vraca "Postoje fajlovi: test.txt image.jpg"
   @Override
-  String doesDirectoryContainFiles(String s, List<String> list) {
+  String doesDirectoryContainFiles(String pathToFolder, List<String> namesOfFiles) {
+    String fullPath = this.getFullStoragePath(pathToFolder);
+    File sourceFolder = new File(fullPath);
+    if (!sourceFolder.exists() || !sourceFolder.isDirectory()) {
+      System.out.println(fullPath + " is not a directory.");
+      return null;
+    }
+    File[] files = Objects.requireNonNull(new File(fullPath).listFiles());
+    String ans = "";
+    List<String> list =
+            Arrays.stream(files)
+            .filter(File::isFile)
+            .map(File::getName)
+            .collect(Collectors.toList());
+    if (list.size() > 0) {
+      ans += "Found files are:";
+      ans += list.toString();
+    } else {
+      ans = "No files exist";
+    }
+    return ans;
+  }
+
+  private String searchForFile(String path, String fileName) {
+    File sourceFolder = new File(path);
+    if (!sourceFolder.exists() || !sourceFolder.isDirectory()) {
+      return null;
+    }
+    File[] files = Objects.requireNonNull(new File(path).listFiles());
+    for (File f : files) {
+      if (f.isDirectory()) {
+        String result = searchForFile(f.getAbsolutePath(), fileName);
+        if (result != null) {
+          return result;
+        }
+      } else {
+        if (f.getName().equalsIgnoreCase(fileName)) {
+          return sourceFolder.getName();
+        }
+      }
+    }
     return null;
   }
 
   @Override
-  String folderNameByFileName(String s) {
-    return null;
+  String folderNameByFileName(String fileName) {
+    return this.searchForFile(super.getRootFolderPath(), fileName);
+  }
+
+  private Map<String, FileMetadata> returnFilesInDateInterval(String fullPath, Date fromDate, Date toDate, boolean created) {
+    Map<String, FileMetadata> ans = new HashMap<>();
+    File sourceFolder = new File(fullPath);
+    if (!sourceFolder.exists() || !sourceFolder.isDirectory()) {
+      System.out.println(fullPath + " is not a directory.");
+      return null;
+    }
+    File[] files = Objects.requireNonNull(new File(fullPath).listFiles());
+    for (File f : files) {
+      if (f.isDirectory()) continue;
+      FileTime creationTime = returnCreationTime(f);
+      FileTime modificationTime = returnModificationTime(f);
+      if (creationTime == null || modificationTime == null) continue;
+      Date newCreationDate = new Date(creationTime.toMillis());
+      Date newModificationDate = new Date(modificationTime.toMillis());
+      if (created) {
+        if (newCreationDate.after(fromDate) && newCreationDate.before(toDate)) {
+          ans.put(f.getName(), new FileMetadata(f.getAbsolutePath(), f.getTotalSpace(), newCreationDate,
+                  newModificationDate, FilenameUtils.getExtension(f.getName()), f.getName()));
+        }
+      } else {
+        if (newModificationDate.after(fromDate) && newModificationDate.before(toDate)) {
+          ans.put(f.getName(), new FileMetadata(f.getAbsolutePath(), f.getTotalSpace(), newCreationDate,
+                  newModificationDate, FilenameUtils.getExtension(f.getName()), f.getName()));
+        }
+      }
+    }
+    return ans;
   }
 
   @Override
-  Map<String, FileMetadata> sortFilesByName(Map<String, FileMetadata> hashMap, boolean b) {
-    return null;
+  Map<String, FileMetadata> returnCreatedFilesInDateInterval(String pathToDirectory, Date fromDate, Date toDate) {
+    return this.returnFilesInDateInterval(pathToDirectory, fromDate, toDate, true);
   }
 
   @Override
-  Map<String, FileMetadata> sortFilesByCreatedDate(Map<String, FileMetadata> hashMap, boolean b) {
-    return null;
-  }
-
-  @Override
-  Map<String, FileMetadata> sortFilesBySize(Map<String, FileMetadata> hashMap, boolean b) {
-    return null;
-  }
-
-  @Override
-  Map<String, FileMetadata> returnCreatedFilesInDateInterval(String s, Date date, Date date1) {
-    return null;
-  }
-
-  @Override
-  Map<String, FileMetadata> returnModifiedFilesInDateInterval(String s, Date date, Date date1) {
-    return null;
+  Map<String, FileMetadata> returnModifiedFilesInDateInterval(String pathToDirectory, Date fromDate, Date toDate) {
+    return this.returnFilesInDateInterval(pathToDirectory, fromDate, toDate, false);
   }
 }

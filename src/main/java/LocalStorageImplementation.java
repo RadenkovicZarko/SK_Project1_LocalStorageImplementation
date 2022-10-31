@@ -3,9 +3,7 @@ import lombok.Setter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
@@ -71,9 +69,30 @@ public class LocalStorageImplementation extends StorageSpecification {
     }
   }
 
+  private void setConfigurationFile(File file) throws IOException {
+    BufferedReader bf = new BufferedReader(new FileReader(file));
+    String line;
+    int lineCounter = 0;
+    while ((line = bf.readLine()) != null) {
+      lineCounter++;
+      if (lineCounter == 1) {
+        int size = Integer.parseInt(line);
+        super.getConfiguration().setSize(size);
+      } else if (lineCounter == 2) {
+        String[] extensions = line.split(" ");
+        for (String ext : extensions) {
+          super.getConfiguration().getAllowedExtensions().add(ext);
+        }
+      } else {
+        String[] parts = line.split(" ");
+        super.getConfiguration().getNumberOfFilesInFolder().put(parts[0], Integer.parseInt(parts[1]));
+      }
+    }
+  }
+
   @Override
   void createRootFolder() {
-    //super.setRootFolderPath("C:\\Users\\cvlad\\Desktop\\SKProjekat\\LocalStorageImplementation");
+    super.setRootFolderPath("C:\\Users\\cvlad\\Desktop\\SKProjekat\\LocalStorageImplementation");
     File rootFile = new File(super.getRootFolderPath() + "\\\\" + this.storageName);
     boolean hasConfiguration = false;
     if (super.getRootFolderPath().length() > 0) {
@@ -81,11 +100,16 @@ public class LocalStorageImplementation extends StorageSpecification {
       for (File f : files) {
         if (f.getName().equalsIgnoreCase(this.storageName)) {
           hasConfiguration = true;
+          try {
+            this.setConfigurationFile(f);
+          } catch (IOException e) {
+            System.out.println("Error while reading a root file.");
+            return;
+          }
           break;
         }
       }
     }
-    System.out.println("Has configuration " + hasConfiguration);
     boolean created = rootFile.mkdir();
     if (hasConfiguration) {
       System.out.println("Root folder already exists.");

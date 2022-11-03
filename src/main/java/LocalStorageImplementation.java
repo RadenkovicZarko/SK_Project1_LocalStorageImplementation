@@ -51,6 +51,10 @@ public class LocalStorageImplementation extends StorageSpecification {
 //    here2.add("1.txt");
 //    here2.add("2.txt");
 //    System.out.println(local.doesDirectoryContainFiles("cvele\\cvele2", here2));
+
+    // TODO
+//    treba da ubacis ogranicenja u metodu putFilesOnSpecifiedPath
+//            moveFileFromDirectoryToAnother
   }
 
   private String getFullStoragePath(String path) {
@@ -81,7 +85,7 @@ public class LocalStorageImplementation extends StorageSpecification {
       } else if (lineCounter == 2) {
         String[] extensions = line.split(" ");
         for (String ext : extensions) {
-          super.getConfiguration().getAllowedExtensions().add(ext);
+          super.getConfiguration().getForbiddenExtensions().add(ext);
         }
       } else {
         String[] parts = line.split(" ");
@@ -144,7 +148,7 @@ public class LocalStorageImplementation extends StorageSpecification {
     return false;
   }
 
-  private boolean uploadFileToPath(String fileName, String path) {
+  private boolean uploadFileToPath(String fileName, String path, boolean check) {
     File srcDir = new File(path);
     if (!srcDir.exists() || !srcDir.isDirectory()) {
       System.out.println("Directory \"" + path + "\" doesn't exist.");
@@ -154,6 +158,9 @@ public class LocalStorageImplementation extends StorageSpecification {
     if (!source.exists()) return false;
     String destPath = path + "\\\\" + source.getName();
     File dest = new File(destPath);
+    if (check) {
+      this.checkForUploadFileErrors(srcDir, dest, source);
+    }
     try {
       FileUtils.copyFile(source, dest);
     } catch (IOException e) {
@@ -162,10 +169,40 @@ public class LocalStorageImplementation extends StorageSpecification {
     return true;
   }
 
+  private String getRelativePath(String path) {
+    return path.substring(path.indexOf("Skladiste"));
+  }
+
+  private boolean checkForUploadFileErrors(File source, File dest, File file) {
+    File rootDir = new File(super.getRootFolderPath());
+    if (!rootDir.exists() || !rootDir.isDirectory()) return true;
+    if (rootDir.length() + file.length() > super.getConfiguration().getSize()) {
+      System.out.println("File size exceeded the root size.");
+      return true;
+    }
+    for (String ext : super.getConfiguration().getForbiddenExtensions()) {
+      if (ext.equalsIgnoreCase(FilenameUtils.getExtension(file.getName()))) {
+        System.out.println("This extension file is forbidden.");
+        return true;
+      }
+    }
+    String relativePath = getRelativePath(source.getAbsolutePath());
+    File relFile = new File(relativePath);
+    if (!relFile.exists() || !relFile.isDirectory()) return true;
+    int fileCount = Objects.requireNonNull(relFile.list()).length;
+
+    if (super.getConfiguration().getNumberOfFilesInFolder().get(relativePath) != null && fileCount + 1 >
+            super.getConfiguration().getNumberOfFilesInFolder().get(relativePath)) {
+      System.out.println("Maximum number of files exceeded");
+      return true;
+    }
+    return false;
+  }
+
   @Override
   boolean putFilesOnSpecifiedPath(List<String> listFiles, String path) {
     for (String filePath : listFiles) {
-      this.uploadFileToPath(filePath, this.getFullStoragePath(path));
+      this.uploadFileToPath(filePath, this.getFullStoragePath(path), true);
     }
     return true;
   }
@@ -202,6 +239,14 @@ public class LocalStorageImplementation extends StorageSpecification {
       return false;
     }
 
+    String relativePath = this.getRelativePath(fileTo.getAbsolutePath());
+    int fileCount = Objects.requireNonNull(fileTo.list()).length;
+    if (super.getConfiguration().getNumberOfFilesInFolder().get(relativePath) != null && fileCount + 1 >
+            super.getConfiguration().getNumberOfFilesInFolder().get(relativePath)) {
+      System.out.println("Maximum number of files exceeded");
+      return true;
+    }
+
     fullPathTo += "\\\\" + file.getName();
     fileTo = new File(fullPathTo);
 
@@ -217,7 +262,7 @@ public class LocalStorageImplementation extends StorageSpecification {
   @Override
   boolean downloadFileOrDirectory(String pathFrom, String pathTo) {
     String fullPathFrom = this.getFullStoragePath(pathFrom);
-    return this.uploadFileToPath(fullPathFrom, pathTo);
+    return this.uploadFileToPath(fullPathFrom, pathTo, false);
   }
 
   @Override
@@ -483,5 +528,15 @@ public class LocalStorageImplementation extends StorageSpecification {
   @Override
   Map<String, FileMetadata> returnModifiedFilesInDateInterval(String pathToDirectory, Date fromDate, Date toDate) {
     return this.returnFilesInDateInterval(pathToDirectory, fromDate, toDate, false);
+  }
+
+  @Override
+  Map<String, FileMetadata> returnModifiedFilesFromDate(String s, Date date) {
+    return null;
+  }
+
+  @Override
+  Map<String, FileMetadata> returnModifiedFilesBeforeDate(String s, Date date) {
+    return null;
   }
 }

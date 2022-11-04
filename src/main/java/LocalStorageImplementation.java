@@ -132,7 +132,10 @@ public class LocalStorageImplementation extends StorageSpecification {
 
   @Override
   boolean createFolderOnSpecifiedPath(String path, String name) throws MyException {
-    // TODO add check
+    File checkFile = new File(this.getFullStoragePath(path));
+    if (!checkFile.exists()) {
+      throw new MyException("Path doesn't exist in storage.");
+    }
     String fullPath = this.getFullStoragePath(path) + "\\\\" + name;
     File file = new File(fullPath);
     boolean created = file.mkdir();
@@ -195,15 +198,27 @@ public class LocalStorageImplementation extends StorageSpecification {
   }
 
   @Override
-  boolean putFilesOnSpecifiedPath(List<String> listFiles, String path) throws MyException { // TODO vraca fajlove koji nisu uspeli u exc
+  boolean putFilesOnSpecifiedPath(List<String> listFiles, String path) throws MyException {
+    StringBuilder sb = new StringBuilder();
     for (String filePath : listFiles) {
-      this.uploadFileToPath(filePath, this.getFullStoragePath(path), true);
+      try {
+        this.uploadFileToPath(filePath, this.getFullStoragePath(path), true);
+      } catch (MyException exc) {
+        sb.append(exc);
+      }
+    }
+    if (sb.length() > 0) {
+      throw new MyException(sb.toString());
     }
     return true;
   }
 
+  private boolean isPathInStorage(String path) {
+    return (path.toLowerCase().contains("skladiste"));
+  }
+
   @Override
-  void deleteFileOrDirectory(String path) throws MyException { // TODO da li se nalazi u skladistu
+  void deleteFileOrDirectory(String path) throws MyException {
     String fullPath = this.getFullStoragePath(path);
     File file = new File(fullPath);
     if (!file.delete()) {
@@ -212,7 +227,7 @@ public class LocalStorageImplementation extends StorageSpecification {
   }
 
   @Override
-  boolean moveFileFromDirectoryToAnother(String filePath, String pathTo) throws MyException { // TODO da li postoje u skladistu
+  boolean moveFileFromDirectoryToAnother(String filePath, String pathTo) throws MyException {
     String fullFilePath = this.getFullStoragePath(filePath);
     String fullPathTo = this.getFullStoragePath(pathTo);
 
@@ -248,6 +263,9 @@ public class LocalStorageImplementation extends StorageSpecification {
 
   @Override
   boolean downloadFileOrDirectory(String pathFrom, String pathTo) throws MyException {
+    if (this.isPathInStorage(pathFrom) && this.isPathInStorage(pathTo)) {
+      throw new MyException("Both paths are in storage.");
+    }
     String fullPathFrom = this.getFullStoragePath(pathFrom);
     return this.uploadFileToPath(fullPathFrom, pathTo, false);
   }
@@ -292,8 +310,8 @@ public class LocalStorageImplementation extends StorageSpecification {
     File[] files = Objects.requireNonNull(new File(fullPath).listFiles());
     for (File f : files) {
       if (f.isDirectory()) continue;
-      FileTime creationTime = returnCreationTime(f);
-      FileTime modificationTime = returnModificationTime(f);
+      FileTime creationTime = this.returnCreationTime(f);
+      FileTime modificationTime = this.returnModificationTime(f);
       if (creationTime == null || modificationTime == null) continue;
       this.map.put(f.getName(), new FileMetadata(f.getAbsolutePath(), f.getTotalSpace(), new Date(creationTime.toMillis()),
               new Date(modificationTime.toMillis()), FilenameUtils.getExtension(f.getName()), f.getName()));
@@ -470,7 +488,7 @@ public class LocalStorageImplementation extends StorageSpecification {
   }
 
   private Map<String, FileMetadata> returnFilesInDateInterval(
-          String fullPath, Date fromDate, Date toDate, boolean created) throws MyException {
+          String fullPath, Date fromDate, Date toDate, boolean created, boolean upTo) throws MyException {
     Map<String, FileMetadata> ans = new HashMap<>();
     File sourceFolder = new File(fullPath);
     if (!sourceFolder.exists() || !sourceFolder.isDirectory()) {
@@ -479,8 +497,8 @@ public class LocalStorageImplementation extends StorageSpecification {
     File[] files = Objects.requireNonNull(new File(fullPath).listFiles());
     for (File f : files) {
       if (f.isDirectory()) continue;
-      FileTime creationTime = returnCreationTime(f);
-      FileTime modificationTime = returnModificationTime(f);
+      FileTime creationTime = this.returnCreationTime(f);
+      FileTime modificationTime = this.returnModificationTime(f);
       if (creationTime == null || modificationTime == null) continue;
       Date newCreationDate = new Date(creationTime.toMillis());
       Date newModificationDate = new Date(modificationTime.toMillis());
@@ -490,9 +508,23 @@ public class LocalStorageImplementation extends StorageSpecification {
                   newModificationDate, FilenameUtils.getExtension(f.getName()), f.getName()));
         }
       } else {
-        if (newModificationDate.after(fromDate) && newModificationDate.before(toDate)) {
-          ans.put(f.getName(), new FileMetadata(f.getAbsolutePath(), f.getTotalSpace(), newCreationDate,
-                  newModificationDate, FilenameUtils.getExtension(f.getName()), f.getName()));
+        if (upTo) {
+          if (fromDate != null) {
+            if (newModificationDate.after(fromDate)) {
+              ans.put(f.getName(), new FileMetadata(f.getAbsolutePath(), f.getTotalSpace(), newCreationDate,
+                      newModificationDate, FilenameUtils.getExtension(f.getName()), f.getName()));
+            }
+          } else {
+            if (newModificationDate.before(toDate)) {
+              ans.put(f.getName(), new FileMetadata(f.getAbsolutePath(), f.getTotalSpace(), newCreationDate,
+                      newModificationDate, FilenameUtils.getExtension(f.getName()), f.getName()));
+            }
+          }
+        } else {
+          if (newModificationDate.after(fromDate) && newModificationDate.before(toDate)) {
+            ans.put(f.getName(), new FileMetadata(f.getAbsolutePath(), f.getTotalSpace(), newCreationDate,
+                    newModificationDate, FilenameUtils.getExtension(f.getName()), f.getName()));
+          }
         }
       }
     }
@@ -502,22 +534,22 @@ public class LocalStorageImplementation extends StorageSpecification {
   @Override
   Map<String, FileMetadata> returnCreatedFilesInDateInterval(
           String pathToDirectory, Date fromDate, Date toDate) throws MyException {
-    return this.returnFilesInDateInterval(pathToDirectory, fromDate, toDate, true);
+    return this.returnFilesInDateInterval(pathToDirectory, fromDate, toDate, true, false);
   }
 
   @Override
   Map<String, FileMetadata> returnModifiedFilesInDateInterval(
           String pathToDirectory, Date fromDate, Date toDate) throws MyException {
-    return this.returnFilesInDateInterval(pathToDirectory, fromDate, toDate, false);
+    return this.returnFilesInDateInterval(pathToDirectory, fromDate, toDate, false, false);
   }
 
   @Override
-  Map<String, FileMetadata> returnModifiedFilesFromDate(String s, Date date) throws MyException {
-    return null; // TODO
+  Map<String, FileMetadata> returnModifiedFilesFromDate(String pathToDirectory, Date fromDate) throws MyException {
+    return this.returnFilesInDateInterval(pathToDirectory, fromDate, null, false, true);
   }
 
   @Override
-  Map<String, FileMetadata> returnModifiedFilesBeforeDate(String s, Date date) throws MyException {
-    return null; //TODO
+  Map<String, FileMetadata> returnModifiedFilesBeforeDate(String pathToDirectory, Date toDate) throws MyException {
+    return this.returnFilesInDateInterval(pathToDirectory, null, toDate, false, true);
   }
 }

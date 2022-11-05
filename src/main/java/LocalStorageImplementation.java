@@ -17,6 +17,13 @@ public class LocalStorageImplementation extends StorageSpecification {
   private Map<String, FileMetadata> map = new HashMap<>();
   private String storageName = "Skladiste";
 
+  static {
+    StorageManager.registerStorage(new LocalStorageImplementation());
+  }
+
+  public LocalStorageImplementation() {
+    super();
+  }
   public static void main(String[] args) {
     LocalStorageImplementation local = new LocalStorageImplementation();
     local.createRootFolder();

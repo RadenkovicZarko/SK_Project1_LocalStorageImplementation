@@ -25,18 +25,18 @@ public class LocalStorageImplementation extends StorageSpecification {
     super();
   }
   public static void main(String[] args) {
-    LocalStorageImplementation local = new LocalStorageImplementation();
-    local.createRootFolder();
-    local.createFolderOnSpecifiedPath("", "cvele");
-    List<String> here = new ArrayList<>();
-    here.add("C:\\Users\\cvlad\\Desktop\\SKProjekat\\LocalStorageImplementation\\p1\\1.txt");
-    here.add("C:\\Users\\cvlad\\Desktop\\SKProjekat\\LocalStorageImplementation\\p1\\2.txt");
-    local.createFolderOnSpecifiedPath("", "dest");
-    local.putFilesOnSpecifiedPath(here, "dest");
-    //local.deleteFileOrDirectory("cvele");
-    local.createFolderOnSpecifiedPath("cvele", "cvele2");
-    local.moveFileFromDirectoryToAnother("dest\\2.txt", "cvele\\cvele2");
-    local.moveFileFromDirectoryToAnother("dest\\1.txt", "cvele\\cvele2");
+//    LocalStorageImplementation local = new LocalStorageImplementation();
+//    local.createRootFolder();
+//    local.createFolderOnSpecifiedPath("", "cvele");
+//    List<String> here = new ArrayList<>();
+//    here.add("C:\\Users\\cvlad\\Desktop\\SKProjekat\\LocalStorageImplementation\\p1\\1.txt");
+//    here.add("C:\\Users\\cvlad\\Desktop\\SKProjekat\\LocalStorageImplementation\\p1\\2.txt");
+//    local.createFolderOnSpecifiedPath("", "dest");
+//    local.putFilesOnSpecifiedPath(here, "dest");
+//    //local.deleteFileOrDirectory("cvele");
+//    local.createFolderOnSpecifiedPath("cvele", "cvele2");
+//    local.moveFileFromDirectoryToAnother("dest\\2.txt", "cvele\\cvele2");
+//    local.moveFileFromDirectoryToAnother("dest\\1.txt", "cvele\\cvele2");
     //System.out.println(local.folderNameByFileName("2.txt"));
 //    System.out.println("from dir: ");
 //    local.filesFromDirectory("cvele");
@@ -58,6 +58,8 @@ public class LocalStorageImplementation extends StorageSpecification {
 //    here2.add("1.txt");
 //    here2.add("2.txt");
 //    System.out.println(local.doesDirectoryContainFiles("cvele\\cvele2", here2));
+    StorageSpecification storageSpecification=new LocalStorageImplementation();
+    System.out.println(storageSpecification.setRootFolderPathInitialization("C:/Users/mega/Radna površina/Test"));
   }
 
   private String getFullStoragePath(String path) {
@@ -97,29 +99,65 @@ public class LocalStorageImplementation extends StorageSpecification {
     }
   }
 
-  @Override
-  boolean createRootFolder() throws MyException {
-    //super.setRootFolderPath("C:\\Users\\cvlad\\Desktop\\SKProjekat\\LocalStorageImplementation");
+//  @Override
+//  boolean createRootFolder() throws MyException {
+//    //super.setRootFolderPath("C:\\Users\\cvlad\\Desktop\\SKProjekat\\LocalStorageImplementation");
+//    File rootFile = new File(super.getRootFolderPath() + "\\\\" + this.storageName);
+//    System.out.println("UDJE1");
+//    boolean hasConfiguration = false;
+//    if (super.getRootFolderPath().length() > 0) {
+//      System.out.println("UDJE2");
+//      File[] files = Objects.requireNonNull(new File(super.getRootFolderPath()).listFiles());
+//      for (File f : files) {
+//        if (f.getName().equalsIgnoreCase(this.storageName)) {
+//          System.out.println("UDJE5");
+//          hasConfiguration = true;
+//          try {
+//            System.out.println(f.getName());
+//            this.setConfigurationFile(f);
+//          } catch (IOException e) {
+//            System.out.println("UDJE6");
+//            throw new MyException("Error while reading a root file.");
+//          }
+//          System.out.println("UDJE4");
+//          break;
+//        }
+//      }
+//    }
+//    System.out.println("UDJE3");
+//
+//    boolean created = rootFile.mkdir();
+//    if (hasConfiguration) {
+//      throw new MyException("Root folder already exists.");
+//    } else if (created) {
+//      this.createConfigurationFile(rootFile.getAbsolutePath());
+//    } else {
+//      throw new MyException("Error during creation root file.");
+//    }
+//    return true;
+//  }
+@Override
+  boolean createRootFolder() throws MyException {  //Mozda bi trebalo da se doda /Skladiste na putanju
     File rootFile = new File(super.getRootFolderPath() + "\\\\" + this.storageName);
     boolean hasConfiguration = false;
-    if (super.getRootFolderPath().length() > 0) {
-      File[] files = Objects.requireNonNull(new File(super.getRootFolderPath()).listFiles());
+    if(rootFile.exists())
+    {
+      File[] files = Objects.requireNonNull(rootFile.listFiles());
       for (File f : files) {
-        if (f.getName().equalsIgnoreCase(this.storageName)) {
+        if (f.getName().equalsIgnoreCase("configuration.txt")) {
           hasConfiguration = true;
           try {
             this.setConfigurationFile(f);
+            return true;
           } catch (IOException e) {
+
             throw new MyException("Error while reading a root file.");
           }
-          break;
         }
       }
     }
     boolean created = rootFile.mkdir();
-    if (hasConfiguration) {
-      throw new MyException("Root folder already exists.");
-    } else if (created) {
+    if (created) {
       this.createConfigurationFile(rootFile.getAbsolutePath());
     } else {
       throw new MyException("Error during creation root file.");
@@ -128,14 +166,18 @@ public class LocalStorageImplementation extends StorageSpecification {
   }
 
   @Override
-  boolean setRootFolderPathInitialization(String s) {
+  boolean setRootFolderPathInitialization(String s) throws MyException{
     File file = new File(s);
     if (file.exists() && file.isDirectory()) {
       super.setRootFolderPath(s);
       return true;
     }
-    return false;
+    throw new MyException("Bad path");
+//    return false;
   }
+
+
+
 
   @Override
   boolean createFolderOnSpecifiedPath(String path, String name) throws MyException {

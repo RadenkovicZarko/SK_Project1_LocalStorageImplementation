@@ -61,9 +61,26 @@ public class LocalStorageImplementation extends StorageSpecification {
 //    System.out.println(local.doesDirectoryContainFiles("cvele\\cvele2", here2));
     StorageSpecification storageSpecification=new LocalStorageImplementation();
     System.out.println(storageSpecification.setRootFolderPathInitialization("C:/Users/mega/Radna površina/Test"));
+//    storageSpecification.getConfiguration().setSize(2000);
+//    List<String> list=new ArrayList<>();
+//    list.add(".exe");
+//    list.add(".pdf");
+//    list.add(".docx");
+//    Map<String,Integer> map=new HashMap<>();
+//    map.put("\\Zarko",2);
+//    storageSpecification.getConfiguration().setForbiddenExtensions(list);
+//    storageSpecification.getConfiguration().setNumberOfFilesInFolder(map);
     storageSpecification.createRootFolder();
-    System.out.println(storageSpecification.getRootFolderPath());
-//    storageSpecification.createFolderOnSpecifiedPath("Zarko","Zarko123");
+    //System.out.println(storageSpecification.getConfiguration().getSize());
+    System.out.println(storageSpecification.getConfiguration().toString());
+    //System.out.println(storageSpecification.getRootFolderPath());
+    //storageSpecification.createFolderOnSpecifiedPath("","Zarko");
+    List<String> fajlovi=new ArrayList<>();
+        fajlovi.add("C:\\Users\\mega\\Radna površina\\b.txt");
+        //fajlovi.add("C:\\Users\\mega\\Radna površina\\Zadaci.docx");
+        //fajlovi.add("C:\\Users\\mega\\Radna površina\\c.txt");
+
+    storageSpecification.putFilesOnSpecifiedPath(fajlovi,"Zarko");
 
   }
 
@@ -149,7 +166,7 @@ public class LocalStorageImplementation extends StorageSpecification {
 //    return true;
 //  }
 @Override
-  boolean createRootFolder() throws MyException {  //Mozda bi trebalo da se doda /Skladiste na putanju
+  boolean createRootFolder() throws MyException {
     File rootFile = new File(super.getRootFolderPath() + "\\\\" + this.storageName);
     boolean hasConfiguration = false;
     if(rootFile.exists())
@@ -175,7 +192,7 @@ public class LocalStorageImplementation extends StorageSpecification {
       throw new MyException("Error during creation root file.");
     }
     return true;
-  }//Okreni samo linije
+  }//Okreni samo linije //Mozda bi trebalo da se doda /Skladiste na putanju // Treba postaviti mapu i listu konf na new
 
   @Override
   boolean setRootFolderPathInitialization(String s) throws MyException{
@@ -203,6 +220,8 @@ public class LocalStorageImplementation extends StorageSpecification {
     }
     String fullPath = this.getFullStoragePath(path) + "\\\\" + name;
     File file = new File(fullPath);
+    if(file.exists())
+      throw new MyException("Folder already exist");
     boolean created = file.mkdir();
     if (created) {
       return true;
@@ -224,40 +243,43 @@ public class LocalStorageImplementation extends StorageSpecification {
     String destPath = path + "\\\\" + source.getName();  //OVO OVDE MOZE DA BUDE PROBLEM
     File dest = new File(destPath);
     if (check) {
-      this.checkForUploadFileErrors(srcDir, source);  //
+      this.checkForUploadFileErrors(srcDir, source);
     }
     try {
+
       FileUtils.copyFile(source, dest);
     } catch (IOException e) {
+
       throw new MyException("Error while uploading files.");
     }
     return true;
   }
 
   private String getRelativePath(String path) {
-    return path.substring(path.indexOf("Skladiste"));
+    return path.substring(path.indexOf("Skladiste")+10);
   }
 
   private void checkForUploadFileErrors(File source, File file) throws MyException {
     File rootDir = new File(this.getFullStoragePath(""));
     if (!rootDir.exists() || !rootDir.isDirectory()) {
+
       throw new MyException("Action invalid.");
     }
     if (rootDir.length() + file.length() > super.getConfiguration().getSize()) {
       throw new MyException("File size exceeded the root size.");
     }
     for (String ext : super.getConfiguration().getForbiddenExtensions()) {
-      if (ext.equalsIgnoreCase(FilenameUtils.getExtension(file.getName()))) {
+
+      if (ext.equalsIgnoreCase("."+FilenameUtils.getExtension(file.getName()))) {
         throw new MyException("This extension file is forbidden.");
       }
     }
     String relativePath = getRelativePath(source.getAbsolutePath());
-    File relFile = new File(relativePath);
+    File relFile = new File(source.getAbsolutePath());
     if (!relFile.exists() || !relFile.isDirectory()) {
       throw new MyException("Action invalid.");
     }
     int fileCount = Objects.requireNonNull(relFile.list()).length;
-
     if (super.getConfiguration().getNumberOfFilesInFolder().get(relativePath) != null && fileCount + 1 >
             super.getConfiguration().getNumberOfFilesInFolder().get(relativePath)) {
       throw new MyException("Maximum number of files exceeded");
@@ -271,6 +293,7 @@ public class LocalStorageImplementation extends StorageSpecification {
       try {
         this.uploadFileToPath(filePath, this.getFullStoragePath(path), true);
       } catch (MyException exc) {
+        System.out.println(filePath);
         sb.append(exc);
       }
     }

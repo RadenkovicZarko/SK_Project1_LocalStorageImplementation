@@ -4,6 +4,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
@@ -60,10 +61,21 @@ public class LocalStorageImplementation extends StorageSpecification {
 //    System.out.println(local.doesDirectoryContainFiles("cvele\\cvele2", here2));
     StorageSpecification storageSpecification=new LocalStorageImplementation();
     System.out.println(storageSpecification.setRootFolderPathInitialization("C:/Users/mega/Radna površina/Test"));
+    storageSpecification.createRootFolder();
+    System.out.println(storageSpecification.getRootFolderPath());
+//    storageSpecification.createFolderOnSpecifiedPath("Zarko","Zarko123");
+
   }
 
   private String getFullStoragePath(String path) {
     return super.getRootFolderPath() + "\\\\" + this.storageName + (path.length() > 0 ? "\\\\" + path : "");
+  }
+
+  boolean isThePathOutsideOfStorage(String path)
+  {
+      if(path.contains(super.getRootFolderPath()))
+        return false;
+      return true;
   }
 
   private void createConfigurationFile(String fullPath) throws MyException {
@@ -163,7 +175,7 @@ public class LocalStorageImplementation extends StorageSpecification {
       throw new MyException("Error during creation root file.");
     }
     return true;
-  }
+  }//Okreni samo linije
 
   @Override
   boolean setRootFolderPathInitialization(String s) throws MyException{
@@ -174,7 +186,7 @@ public class LocalStorageImplementation extends StorageSpecification {
     }
     throw new MyException("Bad path");
 //    return false;
-  }
+  } //TEST OK
 
 
 
@@ -185,6 +197,10 @@ public class LocalStorageImplementation extends StorageSpecification {
     if (!checkFile.exists()) {
       throw new MyException("Path doesn't exist in storage.");
     }
+    if(checkFile.isFile())
+    {
+      throw new MyException("This is file not folder.");
+    }
     String fullPath = this.getFullStoragePath(path) + "\\\\" + name;
     File file = new File(fullPath);
     boolean created = file.mkdir();
@@ -193,20 +209,22 @@ public class LocalStorageImplementation extends StorageSpecification {
     } else {
       throw new MyException("Error during creation of directory: " + name + ".");
     }
-  }
+  }//TEST OK
 
-  private boolean uploadFileToPath(String fileName, String path, boolean check) throws MyException {
+
+
+  private boolean uploadFileToPath(String fileName, String path, boolean check) throws MyException { //FileName je fajl sa celom putanjom, path je putanja do odredjenog direktorijuma
     File srcDir = new File(path);
-    if (!srcDir.exists() || !srcDir.isDirectory()) {
+    if (!srcDir.exists()) {
       throw new MyException("Directory \"" + path + "\" doesn't exist.");
     }
 
     File source = new File(fileName);
-    if (!source.exists()) return false;
-    String destPath = path + "\\\\" + source.getName();
+    if (!source.exists() && !source.isFile()) return false;
+    String destPath = path + "\\\\" + source.getName();  //OVO OVDE MOZE DA BUDE PROBLEM
     File dest = new File(destPath);
     if (check) {
-      this.checkForUploadFileErrors(srcDir, source);
+      this.checkForUploadFileErrors(srcDir, source);  //
     }
     try {
       FileUtils.copyFile(source, dest);
@@ -221,7 +239,7 @@ public class LocalStorageImplementation extends StorageSpecification {
   }
 
   private void checkForUploadFileErrors(File source, File file) throws MyException {
-    File rootDir = new File(super.getRootFolderPath());
+    File rootDir = new File(this.getFullStoragePath(""));
     if (!rootDir.exists() || !rootDir.isDirectory()) {
       throw new MyException("Action invalid.");
     }
@@ -261,6 +279,9 @@ public class LocalStorageImplementation extends StorageSpecification {
     }
     return true;
   }
+
+
+
 
   private boolean isPathInStorage(String path) {
     return (path.toLowerCase().contains("skladiste"));
@@ -332,6 +353,9 @@ public class LocalStorageImplementation extends StorageSpecification {
       throw new MyException("Error while renaming a file.");
     }
   }
+
+
+
 
   private FileTime returnCreationTime(File f) throws MyException {
     try {

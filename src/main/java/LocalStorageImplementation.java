@@ -81,7 +81,11 @@ public class LocalStorageImplementation extends StorageSpecification {
         //fajlovi.add("C:\\Users\\mega\\Radna površina\\c.txt");
 
     //storageSpecification.putFilesOnSpecifiedPath(fajlovi,"Zarko");
-    storageSpecification.downloadFileOrDirectory("Zarko/casd.txt","C:\\\\Users\\\\mega\\\\Radna površina\\Test");
+//    Map<String,FileMetadata>map=storageSpecification.allFilesFromDirectoryAndSubdirectory("");
+//    for(Map.Entry<String,FileMetadata> e:map.entrySet())
+//    {
+//      System.out.println(e.getKey());
+//    }
 
   }
 
@@ -374,6 +378,9 @@ public class LocalStorageImplementation extends StorageSpecification {
   void renameFileOrDirectory(String path, String nameAfter) throws MyException {
     String fullPath = this.getFullStoragePath(path);
     File oldFile = new File(fullPath);
+    if (this.isPathInStorage(path)) {
+      throw new MyException("Path to is in storage.");
+    }
     if (!oldFile.exists()) {
       throw new MyException(path + " does not exist.");
     }
@@ -382,7 +389,7 @@ public class LocalStorageImplementation extends StorageSpecification {
     if (!oldFile.renameTo(newFile)) {
       throw new MyException("Error while renaming a file.");
     }
-  }
+  } //TEST OK
 
 
 
@@ -432,6 +439,7 @@ public class LocalStorageImplementation extends StorageSpecification {
     }
     return false;
   }
+
   @Override
   Map<String, FileMetadata> filesFromDirectory(String path) throws MyException {
     String fullPath = this.getFullStoragePath(path);

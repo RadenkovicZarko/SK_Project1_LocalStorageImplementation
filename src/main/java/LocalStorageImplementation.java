@@ -80,7 +80,8 @@ public class LocalStorageImplementation extends StorageSpecification {
         //fajlovi.add("C:\\Users\\mega\\Radna površina\\Zadaci.docx");
         //fajlovi.add("C:\\Users\\mega\\Radna površina\\c.txt");
 
-    storageSpecification.putFilesOnSpecifiedPath(fajlovi,"Zarko");
+    //storageSpecification.putFilesOnSpecifiedPath(fajlovi,"Zarko");
+    storageSpecification.downloadFileOrDirectory("Zarko/casd.txt","C:\\\\Users\\\\mega\\\\Radna površina\\Test");
 
   }
 
@@ -301,7 +302,7 @@ public class LocalStorageImplementation extends StorageSpecification {
       throw new MyException(sb.toString());
     }
     return true;
-  }
+  } //TEST OK
 
 
 
@@ -317,7 +318,7 @@ public class LocalStorageImplementation extends StorageSpecification {
     if (!file.delete()) {
       throw new MyException("Failed to delete the file.");
     }
-  }
+  } //TEST OK
 
   @Override
   boolean moveFileFromDirectoryToAnother(String filePath, String pathTo) throws MyException {
@@ -352,16 +353,22 @@ public class LocalStorageImplementation extends StorageSpecification {
     } else {
       throw new MyException("Error while moving a file.");
     }
-  }
+  }//TEST OK
 
   @Override
   boolean downloadFileOrDirectory(String pathFrom, String pathTo) throws MyException {
-    if (this.isPathInStorage(pathFrom) && this.isPathInStorage(pathTo)) {
-      throw new MyException("Both paths are in storage.");
+    if (this.isPathInStorage(pathTo)) {
+      throw new MyException("Path to is in storage.");
     }
+
     String fullPathFrom = this.getFullStoragePath(pathFrom);
+    File file=new File(fullPathFrom);
+    if(!file.exists())
+    {
+      throw new MyException("Path from is in not correct.");
+    }
     return this.uploadFileToPath(fullPathFrom, pathTo, false);
-  }
+  } //TEST OK
 
   @Override
   void renameFileOrDirectory(String path, String nameAfter) throws MyException {

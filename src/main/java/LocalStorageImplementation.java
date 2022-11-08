@@ -146,7 +146,7 @@ public class LocalStorageImplementation extends StorageSpecification {
   }
 
 @Override
-  boolean createRootFolder() throws MyException {
+  void createRootFolder() throws MyException {
     File rootFile = new File(super.getRootFolderPath() + "/" + this.storageName);
     boolean hasConfiguration = false;
     if(rootFile.exists())
@@ -157,7 +157,7 @@ public class LocalStorageImplementation extends StorageSpecification {
           hasConfiguration = true;
           try {
             this.setConfigurationFile(f);
-            return true;
+            return;
           } catch (IOException e) {
 
             throw new MyException("Error while reading a root file.");
@@ -171,7 +171,7 @@ public class LocalStorageImplementation extends StorageSpecification {
     } else {
       throw new MyException("Error during creation root file.");
     }
-    return true;
+    return;
   }//Okreni samo linije //Mozda bi trebalo da se doda /Skladiste na putanju // Treba postaviti mapu i listu konf na new
 
   @Override

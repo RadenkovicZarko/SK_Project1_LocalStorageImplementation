@@ -64,7 +64,7 @@ public class LocalStorageImplementation extends StorageSpecification {
     //ODAVDE SAM JA TESTIRAO
     StorageSpecification storageSpecification=new LocalStorageImplementation();
     LocalStorageImplementation localStorageImplementation=new LocalStorageImplementation();
-    System.out.println(storageSpecification.setRootFolderPathInitialization("C:/Users/mega/Radna površina/Test2"));
+//    System.out.println(storageSpecification.setRootFolderPathInitialization("C:/Users/mega/Radna površina/Test2"));
 //    storageSpecification.getConfiguration().setSize(2000);
 //    List<String> list=new ArrayList<>();
 //    list.add(".exe");
@@ -205,7 +205,7 @@ public class LocalStorageImplementation extends StorageSpecification {
 
 
   @Override
-  boolean createFolderOnSpecifiedPath(String path, String name) throws MyException {
+  void createFolderOnSpecifiedPath(String path, String name) throws MyException {
     File checkFile = new File(this.getFullStoragePath(path));
     if (!checkFile.exists()) {
       throw new MyException("Path doesn't exist in storage.");
@@ -220,7 +220,7 @@ public class LocalStorageImplementation extends StorageSpecification {
       throw new MyException("Folder already exist");
     boolean created = file.mkdir();
     if (created) {
-      return true;
+      return;
     } else {
       throw new MyException("Error during creation of directory: " + name + ".");
     }

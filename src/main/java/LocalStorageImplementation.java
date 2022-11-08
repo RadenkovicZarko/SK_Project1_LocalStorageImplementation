@@ -330,7 +330,7 @@ public class LocalStorageImplementation extends StorageSpecification {
   } //TEST OK
 
   @Override
-  boolean moveFileFromDirectoryToAnother(String filePath, String pathTo) throws MyException {
+  void moveFileFromDirectoryToAnother(String filePath, String pathTo) throws MyException {
     String fullFilePath = this.getFullStoragePath(filePath);
     String fullPathTo = this.getFullStoragePath(pathTo);
 
@@ -358,7 +358,7 @@ public class LocalStorageImplementation extends StorageSpecification {
     fileTo = new File(fullPathTo);
 
     if (file.renameTo(fileTo)) {
-      return true;
+      return;
     } else {
       throw new MyException("Error while moving a file.");
     }

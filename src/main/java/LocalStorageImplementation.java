@@ -365,7 +365,7 @@ public class LocalStorageImplementation extends StorageSpecification {
   }//TEST OK
 
   @Override
-  boolean downloadFileOrDirectory(String pathFrom, String pathTo) throws MyException {
+  void downloadFileOrDirectory(String pathFrom, String pathTo) throws MyException {
     pathTo=this.turnSlashes(pathTo);
     pathFrom=this.turnSlashes(pathFrom);
     if (this.isPathInStorage(pathTo)) {
@@ -378,7 +378,13 @@ public class LocalStorageImplementation extends StorageSpecification {
     {
       throw new MyException("Path from is in not correct.");
     }
-    return this.uploadFileToPath(fullPathFrom, pathTo, false);
+    try{
+      this.uploadFileToPath(fullPathFrom, pathTo, false);
+    }
+    catch (MyException e)
+    {
+      throw new MyException(e.getMessage());
+    }
   } //TEST OK
 
   @Override

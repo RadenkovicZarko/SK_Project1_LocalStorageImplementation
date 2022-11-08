@@ -561,11 +561,11 @@ public class LocalStorageImplementation extends StorageSpecification {
   // Vraca null ukoliko nije dobar path, vraca "Ne postoji takvi fajlovi u ovom folderu",
   // vraca "Postoje fajlovi: test.txt image.jpg"
   @Override
-  String doesDirectoryContainFiles(String pathToFolder, List<String> namesOfFiles) throws MyException {
+  String doesDirectoryContainFiles(String pathToFolder, List<String> namesOfFiles) {
     String fullPath = this.getFullStoragePath(pathToFolder);
     File sourceFolder = new File(fullPath);
     if (!sourceFolder.exists() || !sourceFolder.isDirectory()) {
-      throw new MyException(fullPath + " is not a directory.");
+      return null;
     }
     File[] files = Objects.requireNonNull(new File(fullPath).listFiles());
     String ans = "";

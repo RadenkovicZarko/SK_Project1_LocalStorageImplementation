@@ -175,12 +175,12 @@ public class LocalStorageImplementation extends StorageSpecification {
   }//Okreni samo linije //Mozda bi trebalo da se doda /Skladiste na putanju // Treba postaviti mapu i listu konf na new
 
   @Override
-  boolean setRootFolderPathInitialization(String s) throws MyException{
+  void setRootFolderPathInitialization(String s) throws MyException{
     s=this.turnSlashes(s);
     File file = new File(s);
     if (file.exists() && file.isDirectory()) {
       super.setRootFolderPath(s);
-      return true;
+      return;
     }
     throw new MyException("Bad path");
 //    return false;

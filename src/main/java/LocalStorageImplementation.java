@@ -289,7 +289,7 @@ public class LocalStorageImplementation extends StorageSpecification {
   }
 
   @Override
-  boolean putFilesOnSpecifiedPath(List<String> listFiles, String path) throws MyException {
+  void putFilesOnSpecifiedPath(List<String> listFiles, String path) throws MyException {
     StringBuilder sb = new StringBuilder();
     for (String filePath : listFiles) {
       try {
@@ -306,7 +306,7 @@ public class LocalStorageImplementation extends StorageSpecification {
     if (sb.length() > 0) {
       throw new MyException(sb.toString());
     }
-    return true;
+    return;
   } //TEST OK
 
 

@@ -126,6 +126,8 @@ public class LocalStorageImplementation extends StorageSpecification {
 
   private void setConfigurationFile(File file) throws IOException {
     BufferedReader bf = new BufferedReader(new FileReader(file));
+    super.getConfiguration().setForbiddenExtensions(new ArrayList<>());
+    super.getConfiguration().setNumberOfFilesInFolder(new HashMap<>());
     String line;
     int lineCounter = 0;
     while ((line = bf.readLine()) != null) {

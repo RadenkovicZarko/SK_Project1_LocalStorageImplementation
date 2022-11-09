@@ -609,7 +609,7 @@ public class LocalStorageImplementation extends StorageSpecification {
   String folderNameByFileName(String fileName) throws MyException {
     String result = this.searchForFile(super.getRootFolderPath(), fileName);
     if (result == null) {
-      throw new MyException("Folder not found.");
+      return null;
     }
     return result;
   }

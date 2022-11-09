@@ -150,13 +150,11 @@ public class LocalStorageImplementation extends StorageSpecification {
 @Override
   void createRootFolder() throws MyException {
     File rootFile = new File(super.getRootFolderPath() + "/" + this.storageName);
-    boolean hasConfiguration = false;
     if(rootFile.exists())
     {
       File[] files = Objects.requireNonNull(rootFile.listFiles());
       for (File f : files) {
         if (f.getName().equalsIgnoreCase("configuration.txt")) {
-          hasConfiguration = true;
           try {
             this.setConfigurationFile(f);
             return;
@@ -173,7 +171,6 @@ public class LocalStorageImplementation extends StorageSpecification {
     } else {
       throw new MyException("Error during creation root file.");
     }
-    return;
   }//Okreni samo linije //Mozda bi trebalo da se doda /Skladiste na putanju // Treba postaviti mapu i listu konf na new
 
   @Override
@@ -188,6 +185,9 @@ public class LocalStorageImplementation extends StorageSpecification {
 //    return false;
   } //TEST OK
 
+
+  //WINDOWS - / \
+  //LIN - /
   String turnSlashes(String path)
   {
     if(path.contains("\\")) {
@@ -237,7 +237,6 @@ public class LocalStorageImplementation extends StorageSpecification {
     if (!srcDir.exists()) {
       throw new MyException("Directory \"" + path + "\" doesn't exist.");
     }
-
     File source = new File(fileName);
     if (!source.exists() && !source.isFile()) return false;
     String destPath = path + "/" + source.getName();  //OVO OVDE MOZE DA BUDE PROBLEM
@@ -246,7 +245,6 @@ public class LocalStorageImplementation extends StorageSpecification {
       this.checkForUploadFileErrors(srcDir, source);
     }
     try {
-
       FileUtils.copyFile(source, dest);
     } catch (IOException e) {
 
@@ -258,15 +256,15 @@ public class LocalStorageImplementation extends StorageSpecification {
   private String getRelativePath(String path) {
     path=this.turnSlashes(path);
     if(path.indexOf("Skladiste")+10<path.length())
-    return path.substring(path.indexOf("Skladiste")+10);
+      return path.substring(path.indexOf("Skladiste")+10);
     else
       return "";
   }
+  // asdasd/adsasd
 
   private void checkForUploadFileErrors(File source, File file) throws MyException {
     File rootDir = new File(this.getFullStoragePath(""));
     if (!rootDir.exists() || !rootDir.isDirectory()) {
-
       throw new MyException("Action invalid.");
     }
     if (rootDir.length() + file.length() > super.getConfiguration().getSize()) {
@@ -296,12 +294,8 @@ public class LocalStorageImplementation extends StorageSpecification {
     for (String filePath : listFiles) {
       try {
         filePath=this.turnSlashes(filePath);
-        System.out.println(this.getFullStoragePath(path));
         this.uploadFileToPath(filePath, this.getFullStoragePath(path), true);
-        System.out.println(filePath);
-
       } catch (MyException exc) {
-
         sb.append(exc);
       }
     }

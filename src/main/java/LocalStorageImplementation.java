@@ -4,7 +4,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.*;
-import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
@@ -34,7 +33,7 @@ public class LocalStorageImplementation extends StorageSpecification {
 //    here.add("C:\\Users\\cvlad\\Desktop\\SKProjekat\\LocalStorageImplementation\\p1\\2.txt");
 //    local.createFolderOnSpecifiedPath("", "dest");
 //    local.putFilesOnSpecifiedPath(here, "dest");
-//    //local.deleteFileOrDirectory("cvele");
+////    local.deleteFileOrDirectory("cvele");
 //    local.createFolderOnSpecifiedPath("cvele", "cvele2");
 //    local.moveFileFromDirectoryToAnother("dest\\2.txt", "cvele\\cvele2");
 //    local.moveFileFromDirectoryToAnother("dest\\1.txt", "cvele\\cvele2");
@@ -62,9 +61,14 @@ public class LocalStorageImplementation extends StorageSpecification {
 
 
     //ODAVDE SAM JA TESTIRAO
-    StorageSpecification storageSpecification=new LocalStorageImplementation();
-    LocalStorageImplementation localStorageImplementation=new LocalStorageImplementation();
-//    System.out.println(storageSpecification.setRootFolderPathInitialization("C:/Users/mega/Radna površina/Test2"));
+    //A ovde ja
+    /*StorageSpecification storageSpecification=new LocalStorageImplementation();
+    storageSpecification.setRootFolderPathInitialization("C:\\Users\\cvlad\\Desktop\\SKProjekat\\LocalStorageImplementation");
+    storageSpecification.createRootFolder();
+    storageSpecification.createFolderOnSpecifiedPath(".", "cvele");
+    storageSpecification.createFolderOnSpecifiedPath("/cvele", "cvele2");
+    storageSpecification.addLimitForFolder("cvele/cvele2", 12345);
+    storageSpecification.addLimitForFolder("cvele", 54321);*/
 //    storageSpecification.getConfiguration().setSize(2000);
 //    List<String> list=new ArrayList<>();
 //    list.add(".exe");
@@ -76,10 +80,10 @@ public class LocalStorageImplementation extends StorageSpecification {
 //    storageSpecification.getConfiguration().setNumberOfFilesInFolder(map);
 //    storageSpecification.createRootFolder();
     //System.out.println(storageSpecification.getConfiguration().getSize());
-    System.out.println(storageSpecification.getConfiguration().toString());
-
-
-    System.out.println(storageSpecification.getRootFolderPath());
+//    System.out.println(storageSpecification.getConfiguration().toString());
+//
+//
+//    System.out.println(storageSpecification.getRootFolderPath());
 //    storageSpecification.createFolderOnSpecifiedPath("","Zarko1234");
 //    List<String> fajlovi=new ArrayList<>();
 //    fajlovi.add("C:\\Users\\mega\\Radna površina\\b.txt");
@@ -89,26 +93,19 @@ public class LocalStorageImplementation extends StorageSpecification {
 //    storageSpecification.deleteFileOrDirectory("/Zarko1234");
 //    storageSpecification.deleteFileOrDirectory("\\b.txt");
 //    storageSpecification.moveFileFromDirectoryToAnother("/c.txt","/Zarko");
-    List<String> list=new ArrayList<>();
-    list.add(".txt");
-    Map<String,FileMetadata>map=storageSpecification.allFilesFromDirectoryAndSubdirectoryExt(".",list);
-    for(Map.Entry<String,FileMetadata> e:map.entrySet())
-    {
-      System.out.println(e.getKey());
-    }
+//    List<String> list=new ArrayList<>();
+//    list.add(".txt");
+//    Map<String,FileMetadata>map=storageSpecification.allFilesFromDirectoryAndSubdirectoryExt(".",list);
+//    for(Map.Entry<String,FileMetadata> e:map.entrySet())
+//    {
+//      System.out.println(e.getKey());
+//    }
 
   }
 
   private String getFullStoragePath(String path) {
     return this.turnSlashes(super.getRootFolderPath()) +"/"+this.storageName+(path.equals(".")?"":this.turnSlashes(path));
     //return super.getRootFolderPath() + "\\\\" + this.storageName + (path.length() > 0 ? "\\\\" + path : "");
-  }
-
-  boolean isThePathOutsideOfStorage(String path)
-  {
-      if(path.contains(super.getRootFolderPath()))
-        return false;
-      return true;
   }
 
   private void createConfigurationFile(String fullPath) throws MyException {
@@ -195,7 +192,7 @@ public class LocalStorageImplementation extends StorageSpecification {
       StringBuilder stringBuilder = new StringBuilder();
       for (int i = 0; i < str.length; i++) {
         if (i != str.length - 1)
-          stringBuilder.append(str[i] + "/");
+          stringBuilder.append(str[i]).append("/");
         else
           stringBuilder.append(str[i]);
       }
@@ -221,24 +218,22 @@ public class LocalStorageImplementation extends StorageSpecification {
     if(file.exists())
       throw new MyException("Folder already exist");
     boolean created = file.mkdir();
-    if (created) {
-      return;
-    } else {
+    if (!created) {
       throw new MyException("Error during creation of directory: " + name + ".");
     }
-  }//TEST OK
+  }
 
-
-
-  private boolean uploadFileToPath(String fileName, String path, boolean check) throws MyException { //FileName je fajl sa celom putanjom, path je putanja do odredjenog direktorijuma
-    fileName=this.turnSlashes(fileName);
-    path=this.turnSlashes(path);
+  private void uploadFileToPath(String fileName, String path, boolean check) throws MyException { //FileName je fajl sa celom putanjom, path je putanja do odredjenog direktorijuma
+    fileName = this.turnSlashes(fileName);
+    path = this.turnSlashes(path);
     File srcDir = new File(path);
     if (!srcDir.exists()) {
       throw new MyException("Directory \"" + path + "\" doesn't exist.");
     }
     File source = new File(fileName);
-    if (!source.exists() && !source.isFile()) return false;
+    if (!source.exists() && !source.isFile()) {
+      throw new MyException("Source file doesn't exist.");
+    }
     String destPath = path + "/" + source.getName();  //OVO OVDE MOZE DA BUDE PROBLEM
     File dest = new File(destPath);
     if (check) {
@@ -247,10 +242,8 @@ public class LocalStorageImplementation extends StorageSpecification {
     try {
       FileUtils.copyFile(source, dest);
     } catch (IOException e) {
-
       throw new MyException("Error while uploading files.");
     }
-    return true;
   }
 
   private String getRelativePath(String path) {
@@ -260,7 +253,6 @@ public class LocalStorageImplementation extends StorageSpecification {
     else
       return "";
   }
-  // asdasd/adsasd
 
   private void checkForUploadFileErrors(File source, File file) throws MyException {
     File rootDir = new File(this.getFullStoragePath(""));
@@ -302,11 +294,7 @@ public class LocalStorageImplementation extends StorageSpecification {
     if (sb.length() > 0) {
       throw new MyException(sb.toString());
     }
-    return;
-  } //TEST OK
-
-
-
+  }
 
   private boolean isPathInStorage(String path) {
     return (path.toLowerCase().contains("skladiste"));
@@ -353,9 +341,7 @@ public class LocalStorageImplementation extends StorageSpecification {
     fullPathTo += "/" + file.getName();
     fileTo = new File(fullPathTo);
 
-    if (file.renameTo(fileTo)) {
-      return;
-    } else {
+    if (!file.renameTo(fileTo)) {
       throw new MyException("Error while moving a file.");
     }
   }//TEST OK
@@ -603,11 +589,7 @@ public class LocalStorageImplementation extends StorageSpecification {
 
   @Override
   String folderNameByFileName(String fileName) throws MyException {
-    String result = this.searchForFile(super.getRootFolderPath(), fileName);
-    if (result == null) {
-      return null;
-    }
-    return result;
+    return this.searchForFile(super.getRootFolderPath(), fileName);
   }
 
   private Map<String, FileMetadata> returnFilesInDateInterval(
@@ -678,5 +660,23 @@ public class LocalStorageImplementation extends StorageSpecification {
   Map<String, FileMetadata> returnModifiedFilesBeforeDate(String pathToDirectory, Date toDate) throws MyException {
     pathToDirectory=this.getFullStoragePath(pathToDirectory);
     return this.returnFilesInDateInterval(pathToDirectory, null, toDate, false, true);
+  }
+
+  @Override
+  void addLimitForFolder(String path, int number) throws MyException {
+    String filePath = this.turnSlashes(path);
+    String confPath = super.getRootFolderPath() + "/" + this.storageName + "/" + "configuration.txt";
+    File confFile = new File(this.turnSlashes(confPath));
+    if (!confFile.exists()) {
+      throw new MyException("Configuration file not found.");
+    }
+    try {
+      FileWriter myWriter = new FileWriter(confPath, true);
+      myWriter.write(path + " " + number + "\n");
+      super.getConfiguration().getNumberOfFilesInFolder().put(filePath, number);
+      myWriter.close();
+    } catch (IOException e) {
+      throw new MyException("An error occurred while writing in configuration file.");
+    }
   }
 }

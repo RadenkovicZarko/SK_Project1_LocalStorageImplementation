@@ -304,8 +304,7 @@ public class LocalStorageImplementation extends StorageSpecification {
 
   @Override
   void deleteFileOrDirectory(String path) throws MyException {
-    if(path.equals(this.getFullStoragePath(path)))
-    {
+    if (path.equals(this.getFullStoragePath(path))) {
       throw new MyException("Cannot delete root folder");
     }
     String fullPath = this.getFullStoragePath(path);
@@ -585,7 +584,7 @@ public class LocalStorageImplementation extends StorageSpecification {
 
   @Override
   String folderNameByFileName(String fileName) throws MyException {
-    return this.searchForFile(super.getRootFolderPath() + "/" + this.storageName, fileName, this.storageName);
+    return this.searchForFile(this.getFullStoragePath("."), fileName, this.storageName);
   }
 
   private Map<String, FileMetadata> returnFilesInDateInterval(

@@ -67,8 +67,12 @@ public class LocalStorageImplementation extends StorageSpecification {
     storageSpecification.createRootFolder();
     storageSpecification.createFolderOnSpecifiedPath(".", "cvele");
     storageSpecification.createFolderOnSpecifiedPath("/cvele", "cvele2");
-    storageSpecification.addLimitForFolder("cvele/cvele2", 12345);
-    storageSpecification.addLimitForFolder("cvele", 54321);*/
+//    storageSpecification.mkdirCreateFiles("{1-12}", ".");
+//    storageSpecification.mkdirCreateFiles("{1-10}abc", "/cvele");
+//    storageSpecification.mkdirCreateFiles("s{1-10}abc", ".");
+//    storageSpecification.mkdirCreateFiles("s{1-10}", ".");
+//    storageSpecification.mkdirCreateFiles("{1}", ".");
+    storageSpecification.mkdirCreateFiles("s{20-1}", ".");*/
 //    storageSpecification.getConfiguration().setSize(2000);
 //    List<String> list=new ArrayList<>();
 //    list.add(".exe");
@@ -101,9 +105,7 @@ public class LocalStorageImplementation extends StorageSpecification {
 //      System.out.println(e.getKey());
 //    }
 
-
     //StorageSpecification storageSpecification=new LocalStorageImplementation();
-
     //Neispravni ulazi za path
     //storageSpecification.setRootFolderPathInitialization("");
     //storageSpecification.setRootFolderPathInitialization("asdasd");
@@ -377,7 +379,7 @@ public class LocalStorageImplementation extends StorageSpecification {
     StringBuilder sb = new StringBuilder();
     for (String filePath : listFiles) {
       try {
-        filePath=this.turnSlashes(filePath);
+        filePath = this.turnSlashes(filePath);
         this.uploadFileToPath(filePath, this.getFullStoragePath(path), true);
       } catch (MyException exc) {
         sb.append(filePath).append(" ").append(exc.getMessage());
@@ -762,6 +764,50 @@ public class LocalStorageImplementation extends StorageSpecification {
       myWriter.close();
     } catch (IOException e) {
       throw new MyException("An error occurred while writing in configuration file.");
+    }
+  }
+
+  @Override
+  public void mkdirCreateFiles(String input, String path) throws MyException {
+    File checkFile = new File(this.getFullStoragePath(path));
+    if (!checkFile.exists()) {
+      throw new MyException("Path doesn't exist in storage.");
+    }
+    if (checkFile.isFile()) {
+      throw new MyException("This is file not folder.");
+    }
+    long countOpen = input.codePoints().filter(ch -> ch == '{').count();
+    long countClosed = input.codePoints().filter(ch -> ch == '}').count();
+    if (!input.contains("{") || !input.contains("}") || countOpen != 1 || countClosed != 1) {
+      throw new MyException("Input format invalid.");
+    }
+    String inBrackets = input.substring(input.indexOf("{") + 1, input.indexOf("}"));
+    String beforeBrackets = input.substring(0, input.indexOf("{"));
+    String afterBrackets = input.substring(input.indexOf("}") + 1);
+    if (inBrackets.length() <= 0 ) {
+      throw new MyException("Input format invalid.");
+    }
+    String[] parts = inBrackets.split("-");
+    if (parts.length <= 0 || parts.length > 2) {
+      throw new MyException("Input format invalid.");
+    }
+    int left = Integer.parseInt(parts[0]);
+    int right = (parts.length > 1 ? Integer.parseInt(parts[1]) : left);
+    int increment = (left <= right ? +1 : -1);
+    for (int i = left; ; i += increment) {
+      String name = beforeBrackets + i + afterBrackets;
+      String fullPath = this.getFullStoragePath(path) + "/" + name;
+      File file = new File(fullPath);
+      boolean created;
+      try {
+        created = file.createNewFile();
+      } catch (IOException e) {
+        throw new MyException("Error during creation of file: " + name + ".");
+      }
+      if (!created) {
+        throw new MyException("Error during creation of file: " + name + ".");
+      }
+      if (i == right) break;
     }
   }
 }

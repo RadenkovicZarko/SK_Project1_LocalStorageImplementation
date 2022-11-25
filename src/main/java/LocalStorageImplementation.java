@@ -639,6 +639,7 @@ public class LocalStorageImplementation extends StorageSpecification {
             Arrays.stream(files)
                     .filter(File::isFile)
                     .map(File::getName)
+                    .filter(namesOfFiles::contains)
                     .collect(Collectors.toList());
     if (list.size() > 0) {
       ans += "Found files are:";

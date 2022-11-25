@@ -4,9 +4,11 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.*;
+import java.lang.reflect.MalformedParameterizedTypeException;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,7 +39,7 @@ public class LocalStorageImplementation extends StorageSpecification {
 //    local.createFolderOnSpecifiedPath("cvele", "cvele2");
 //    local.moveFileFromDirectoryToAnother("dest\\2.txt", "cvele\\cvele2");
 //    local.moveFileFromDirectoryToAnother("dest\\1.txt", "cvele\\cvele2");
-//    System.out.println(local.folderNameByFileName("2.txt"));
+    //System.out.println(local.folderNameByFileName("2.txt"));
 //    System.out.println("from dir: ");
 //    local.filesFromDirectory("cvele");
 //    System.out.println("from child dir: ");
@@ -62,21 +64,13 @@ public class LocalStorageImplementation extends StorageSpecification {
 
     //ODAVDE SAM JA TESTIRAO
     //A ovde ja
-    /*LocalStorageImplementation storageSpecification=new LocalStorageImplementation();
+    /*StorageSpecification storageSpecification=new LocalStorageImplementation();
     storageSpecification.setRootFolderPathInitialization("C:\\Users\\cvlad\\Desktop\\SKProjekat\\LocalStorageImplementation");
     storageSpecification.createRootFolder();
     storageSpecification.createFolderOnSpecifiedPath(".", "cvele");
     storageSpecification.createFolderOnSpecifiedPath("/cvele", "cvele2");
     storageSpecification.addLimitForFolder("cvele/cvele2", 12345);
-    storageSpecification.addLimitForFolder("cvele", 54321);
-    List<String> here = new ArrayList<>();
-    here.add("C:\\Users\\cvlad\\Desktop\\SKProjekat\\LocalStorageImplementation\\p1\\1.txt");
-    here.add("C:\\Users\\cvlad\\Desktop\\SKProjekat\\LocalStorageImplementation\\p1\\2.txt");
-    storageSpecification.createFolderOnSpecifiedPath("", "dest");
-    storageSpecification.createFolderOnSpecifiedPath("/dest", "ovde");
-    storageSpecification.putFilesOnSpecifiedPath(here, "/dest/ovde");
-    System.out.println(storageSpecification.folderNameByFileName("1.txt"));
-    System.out.println(storageSpecification.folderNameByFileName("2.txt"));*/
+    storageSpecification.addLimitForFolder("cvele", 54321);*/
 //    storageSpecification.getConfiguration().setSize(2000);
 //    List<String> list=new ArrayList<>();
 //    list.add(".exe");
@@ -108,14 +102,124 @@ public class LocalStorageImplementation extends StorageSpecification {
 //    {
 //      System.out.println(e.getKey());
 //    }
+
+
+    StorageSpecification storageSpecification=new LocalStorageImplementation();
+
+    //Neispravni ulazi za path
+    //storageSpecification.setRootFolderPathInitialization("");
+    //storageSpecification.setRootFolderPathInitialization("asdasd");
+
+    //Ispravni ulazi za path
+    //storageSpecification.setRootFolderPathInitialization(".");
+    //storageSpecification.setRootFolderPathInitialization("C:/Users/mega/Radna površina/Test3");
+    storageSpecification.setRootFolderPathInitialization("C:\\Users\\mega\\Radna površina\\Test3");
+    //System.out.println(new File(storageSpecification.getRootFolderPath()).getAbsolutePath());
+
+//    Test za createFolderOnSpecifiedPath
+//    storageSpecification.createRootFolder();
+//    storageSpecification.createRootFolder();
+//
+//    storageSpecification.setConfigurationSizeOfStorage(2222);
+//    List<String> list=new ArrayList<>();
+//    list.add(".exe");
+//    list.add(".asd");
+//    list.add(".docx");
+//    storageSpecification.setConfigurationExtensions(list);
+//    HashMap<String,Integer> map=new HashMap<>();
+//    map.put("/Zarko/Vladan",5);
+//    map.put("/Zarko/Vladan123",5);
+//    storageSpecification.setConfigurationNumberOfFilesInFolder(map);
+//    storageSpecification.createRootFolder();
+//    System.out.println(storageSpecification.getConfiguration().getSize());
+//    System.out.println(storageSpecification.getConfiguration().getForbiddenExtensions());
+//    System.out.println(storageSpecification.getConfiguration().getNumberOfFilesInFolder());
+    System.out.println(storageSpecification.getRootFolderPath());
+    storageSpecification.createRootFolder();
+
+//    storageSpecification.createFolderOnSpecifiedPath("asdsad","asd");
+//    storageSpecification.createFolderOnSpecifiedPath("","asdasd");
+//    storageSpecification.createFolderOnSpecifiedPath(".","Zarko");
+//    storageSpecification.createFolderOnSpecifiedPath("/Zarko","Vladan");
+//    storageSpecification.createFolderOnSpecifiedPath("/asd","asd");
+
+
+//    List<String> list=new ArrayList<>();
+//    list.add("");
+//    list.add(".");
+//    list.add("C:\\Users\\mega\\Radna površina\\Test3\\Skladiste\\a.txt");
+//    list.add("C:\\Users\\mega\\Radna površina\\a.txt");
+//    list.add("C:\\Users\\mega\\Radna površina\\b.txt");
+//    list.add("C:\\Users\\mega\\Radna površina\\c.txt");
+//    list.add("C:\\Users\\mega\\Radna površina\\Zadaci.docx");
+//    storageSpecification.putFilesOnSpecifiedPath(list,"");
+//    storageSpecification.putFilesOnSpecifiedPath(list,".");
+//    storageSpecification.putFilesOnSpecifiedPath(list,"/asdasda");
+//    storageSpecification.putFilesOnSpecifiedPath(list,"/Zarko/Vladan");
+
+//    storageSpecification.deleteFileOrDirectory("asdasd");
+//    storageSpecification.deleteFileOrDirectory(".");
+//    storageSpecification.deleteFileOrDirectory("/b.txt");
+//    storageSpecification.deleteFileOrDirectory("Zarko");
+//    storageSpecification.deleteFileOrDirectory("/asdasd");
+
+//    storageSpecification.moveFileFromDirectoryToAnother("\\c.txt","\\Zarko");
+//    storageSpecification.moveFileFromDirectoryToAnother("\\Vladan123","\\Zarko");
+//    storageSpecification.moveFileFromDirectoryToAnother("\\b.txt","\\Zarko123");
+
+//    storageSpecification.downloadFileOrDirectory("\\Zarko\\c.txt","C:\\Users\\mega\\Radna površina\\Test3");
+
+
+//    storageSpecification.renameFileOrDirectory("/b.txt","asd.txt");
+
+//    List<String> list=new ArrayList<>();
+//    list.add("asd.txt");
+//    System.out.println(storageSpecification.doesDirectoryContainFiles("/Vladan123",list));
+
+
+//    System.out.println(storageSpecification.folderNameByFileName("zarko.txt"));  --------------------------------------
+
+//    Map<String,FileMetadata> map=storageSpecification.sortFilesByCreatedDate(storageSpecification.filesFromDirectory("/Zarko/Vladan"),true);
+//    System.out.println(storageSpecification.returnStringForOutput(map));
+
+
+//    Date d1;
+//    Date d2;
+//    try {
+//      d1 = new SimpleDateFormat("dd/M/yyyy").parse("10/11/2022");
+//      d2 = new SimpleDateFormat("dd/M/yyyy").parse("15/11/2022");
+//      Map<String,FileMetadata> map=storageSpecification.returnModifiedFilesInDateInterval("/Zarko/Vladan",d1,d2);
+//      Map<String,FileMetadata> map1=storageSpecification.sortFilesByCreatedDate(storageSpecification.filesFromDirectory("/Zarko/Vladan"),true);
+//      storageSpecification.setDateAttribute();
+//      System.out.println(storageSpecification.returnStringForOutput(map));
+////      System.out.println(storageSpecification.returnStringForOutput(map1));
+//    }
+//    catch (Exception e)
+//    {
+//      e.printStackTrace();
+//    }
+
+
+
+
+
+  }
+
+  private boolean isInsideOfStorage(String path)
+  {
+    System.out.println(turnSlashes(path)+" "+this.getFullStoragePath(""));
+      if(turnSlashes(path).contains(this.getFullStoragePath("")))
+        return true;
+      return false;
   }
 
   private String getFullStoragePath(String path) {
-    return this.turnSlashes(super.getRootFolderPath()) + "/" + this.storageName+(path.equals(".") ? "" : this.turnSlashes(path));
+    return this.turnSlashes(super.getRootFolderPath()) +"/"+this.storageName+(path.equals(".")?"":this.turnSlashes(path));
+    //return super.getRootFolderPath() + "\\\\" + this.storageName + (path.length() > 0 ? "\\\\" + path : "");
   }
 
   private void createConfigurationFile(String fullPath) throws MyException {
-    fullPath = this.turnSlashes(fullPath);
+    fullPath=this.turnSlashes(fullPath);
     String destPath = fullPath + "/" + "configuration.txt";
     File dest = new File(destPath);
     try {
@@ -152,6 +256,7 @@ public class LocalStorageImplementation extends StorageSpecification {
 
 @Override
   void createRootFolder() throws MyException {
+  System.out.println(this.turnSlashes("C:\\Users\\mega\\Radna površina\\Test3")+"  ------------");
     File rootFile = new File(super.getRootFolderPath() + "/" + this.storageName);
     if(rootFile.exists())
     {
@@ -174,34 +279,38 @@ public class LocalStorageImplementation extends StorageSpecification {
     } else {
       throw new MyException("Error during creation root file.");
     }
-  }
+  }//Okreni samo linije //Mozda bi trebalo da se doda /Skladiste na putanju // Treba postaviti mapu i listu konf na new
 
   @Override
   void setRootFolderPathInitialization(String s) throws MyException{
-    s = this.turnSlashes(s);
+    s=this.turnSlashes(s);
     File file = new File(s);
     if (file.exists() && file.isDirectory()) {
-      super.setRootFolderPath(s);
+      super.setRootFolderPath(turnSlashes(file.getAbsolutePath()));
       return;
     }
     throw new MyException("Bad path");
-  }
+//    return false;
+  } //TEST OK
 
-  String turnSlashes(String path) {
-    if (path.contains("\\")) {
-      String[] str = path.split("\\+");
+
+  //WINDOWS - / \
+  //LIN - /
+  String turnSlashes(String path)
+  {
+    if(path.contains("\\")) {
+      String[] str = path.split("\\\\");
       StringBuilder stringBuilder = new StringBuilder();
       for (int i = 0; i < str.length; i++) {
-        if (i != str.length - 1) {
-          stringBuilder.append(str[i]).append("/");
-        }
-        else {
+        if (i != str.length - 1){
+          stringBuilder.append(str[i]).append("/"); }
+        else
           stringBuilder.append(str[i]);
-        }
       }
       return stringBuilder.toString();
     }
-    return path;
+    else
+      return path;
   }
 
 
@@ -239,6 +348,10 @@ public class LocalStorageImplementation extends StorageSpecification {
     String destPath = path + "/" + source.getName();  //OVO OVDE MOZE DA BUDE PROBLEM
     File dest = new File(destPath);
     if (check) {
+      if(isInsideOfStorage(source.getAbsolutePath()))
+      {
+        throw new MyException("File is inside of storage");
+      }
       this.checkForUploadFileErrors(srcDir, source);
     }
     try {
@@ -249,11 +362,11 @@ public class LocalStorageImplementation extends StorageSpecification {
   }
 
   private String getRelativePath(String path) {
-    path = this.turnSlashes(path);
-    if (path.indexOf("Skladiste") + 10 < path.length()) {
-      return path.substring(path.indexOf("Skladiste") + 10);
-    }
-    return "";
+    path=this.turnSlashes(path);
+    if(path.indexOf("Skladiste")+10<path.length())
+      return path.substring(path.indexOf("Skladiste")+10);
+    else
+      return "";
   }
 
   private void checkForUploadFileErrors(File source, File file) throws MyException {
@@ -287,10 +400,10 @@ public class LocalStorageImplementation extends StorageSpecification {
     StringBuilder sb = new StringBuilder();
     for (String filePath : listFiles) {
       try {
-        filePath = this.turnSlashes(filePath);
+        filePath=this.turnSlashes(filePath);
         this.uploadFileToPath(filePath, this.getFullStoragePath(path), true);
       } catch (MyException exc) {
-        sb.append(exc);
+        sb.append(filePath).append(" ").append(exc.getMessage());
       }
     }
     if (sb.length() > 0) {
@@ -303,8 +416,9 @@ public class LocalStorageImplementation extends StorageSpecification {
   }
 
   @Override
-  void deleteFileOrDirectory(String path) throws MyException {
-    if (path.equals(this.getFullStoragePath(path))) {
+  void deleteFileOrDirectory(String path) throws MyException { //PROVERITI ISTO ZA ROOT FOLDER NA DRIVE
+    if(turnSlashes(this.getFullStoragePath("")).equals(this.getFullStoragePath(path)))
+    {
       throw new MyException("Cannot delete root folder");
     }
     String fullPath = this.getFullStoragePath(path);
@@ -312,7 +426,7 @@ public class LocalStorageImplementation extends StorageSpecification {
     if (!file.delete()) {
       throw new MyException("Failed to delete the file.");
     }
-  }
+  } //TEST OK
 
   @Override
   void moveFileFromDirectoryToAnother(String filePath, String pathTo) throws MyException {
@@ -332,6 +446,11 @@ public class LocalStorageImplementation extends StorageSpecification {
       throw new MyException("Not a directory destination.");
     }
 
+
+    if(!isInsideOfStorage(file.getAbsolutePath()) &&
+            !isInsideOfStorage(fileTo.getAbsolutePath()))
+      throw new MyException("Not inside of storage");
+
     String relativePath = this.getRelativePath(fileTo.getAbsolutePath());
     int fileCount = Objects.requireNonNull(fileTo.list()).length;
     if (super.getConfiguration().getNumberOfFilesInFolder().get(relativePath) != null && fileCount + 1 >
@@ -345,35 +464,35 @@ public class LocalStorageImplementation extends StorageSpecification {
     if (!file.renameTo(fileTo)) {
       throw new MyException("Error while moving a file.");
     }
-  }
+  }//TEST OK
 
   @Override
   void downloadFileOrDirectory(String pathFrom, String pathTo) throws MyException {
-    pathTo = this.turnSlashes(pathTo);
-    pathFrom = this.turnSlashes(pathFrom);
+    pathTo=this.turnSlashes(pathTo);
+    pathFrom=this.turnSlashes(pathFrom);
     if (this.isPathInStorage(pathTo)) {
       throw new MyException("Path to is in storage.");
     }
 
     String fullPathFrom = this.getFullStoragePath(pathFrom);
-    File file = new File(fullPathFrom);
-    if (!file.exists()) {
+    File file=new File(fullPathFrom);
+    if(!file.exists())
+    {
       throw new MyException("Path from is in not correct.");
     }
-    try {
+    try{
       this.uploadFileToPath(fullPathFrom, pathTo, false);
-    } catch (MyException e) {
+    }
+    catch (MyException e)
+    {
       throw new MyException(e.getMessage());
     }
-  }
+  } //TEST OK
 
   @Override
   void renameFileOrDirectory(String path, String nameAfter) throws MyException {
     String fullPath = this.getFullStoragePath(path);
     File oldFile = new File(fullPath);
-    if (this.isPathInStorage(path)) {
-      throw new MyException("Path to is in storage.");
-    }
     if (!oldFile.exists()) {
       throw new MyException(path + " does not exist.");
     }
@@ -382,7 +501,10 @@ public class LocalStorageImplementation extends StorageSpecification {
     if (!oldFile.renameTo(newFile)) {
       throw new MyException("Error while renaming a file.");
     }
-  }
+  } //TEST OK
+
+
+
 
   private FileTime returnCreationTime(File f) throws MyException {
     try {
@@ -421,7 +543,7 @@ public class LocalStorageImplementation extends StorageSpecification {
 
   private boolean initialFileDirectoryError(String fullPath) throws MyException {
     this.map.clear();
-    fullPath = this.turnSlashes(fullPath);
+    fullPath=this.turnSlashes(fullPath);
     File sourceFolder = new File(fullPath);
     if (!sourceFolder.exists()) {
       throw new MyException(fullPath + " does not a exist.");
@@ -535,8 +657,8 @@ public class LocalStorageImplementation extends StorageSpecification {
     return this.map = this.createNewFilteredMap(list, false);
   }
 
-  // returns null if path is invalid, returns "No files exist",
-  // returns "Found files are: test.txt image.jpg"
+  // Vraca null ukoliko nije dobar path, vraca "Ne postoji takvi fajlovi u ovom folderu",
+  // vraca "Postoje fajlovi: test.txt image.jpg"
   @Override
   String doesDirectoryContainFiles(String pathToFolder, List<String> namesOfFiles) {
     String fullPath = this.getFullStoragePath(pathToFolder);
@@ -560,8 +682,8 @@ public class LocalStorageImplementation extends StorageSpecification {
     return ans;
   }
 
-  private String searchForFile(String path, String fileName, String returnPath) {
-    path = this.turnSlashes(path);
+  private String searchForFile(String path, String fileName) {
+    path=this.turnSlashes(path);
     File sourceFolder = new File(path);
     if (!sourceFolder.exists() || !sourceFolder.isDirectory()) {
       return null;
@@ -569,13 +691,13 @@ public class LocalStorageImplementation extends StorageSpecification {
     File[] files = Objects.requireNonNull(new File(path).listFiles());
     for (File f : files) {
       if (f.isDirectory()) {
-        String result = searchForFile(f.getAbsolutePath(), fileName, returnPath + "/" + f.getName());
+        String result = searchForFile(f.getAbsolutePath(), fileName);
         if (result != null) {
           return result;
         }
       } else {
         if (f.getName().equalsIgnoreCase(fileName)) {
-          return returnPath;
+          return sourceFolder.getName();
         }
       }
     }
@@ -584,7 +706,7 @@ public class LocalStorageImplementation extends StorageSpecification {
 
   @Override
   String folderNameByFileName(String fileName) throws MyException {
-    return this.searchForFile(this.getFullStoragePath("."), fileName, this.storageName);
+    return this.searchForFile(super.getRootFolderPath(), fileName);
   }
 
   private Map<String, FileMetadata> returnFilesInDateInterval(
@@ -603,6 +725,10 @@ public class LocalStorageImplementation extends StorageSpecification {
       Date newCreationDate = new Date(creationTime.toMillis());
       Date newModificationDate = new Date(modificationTime.toMillis());
       if (created) {
+//        System.out.println("USao");
+//        System.out.println(newCreationDate);
+//        System.out.println(fromDate);
+//        System.out.println(newCreationDate.after(fromDate));
         if (newCreationDate.after(fromDate) && newCreationDate.before(toDate)) {
           ans.put(f.getName(), new FileMetadata(f.getAbsolutePath(), f.getTotalSpace(), newCreationDate,
                   newModificationDate, FilenameUtils.getExtension(f.getName()), f.getName()));
@@ -634,26 +760,26 @@ public class LocalStorageImplementation extends StorageSpecification {
   @Override
   Map<String, FileMetadata> returnCreatedFilesInDateInterval(
           String pathToDirectory, Date fromDate, Date toDate) throws MyException {
-    pathToDirectory = this.getFullStoragePath(pathToDirectory);
+    pathToDirectory=this.getFullStoragePath(pathToDirectory);
     return this.returnFilesInDateInterval(pathToDirectory, fromDate, toDate, true, false);
   }
 
   @Override
   Map<String, FileMetadata> returnModifiedFilesInDateInterval(
           String pathToDirectory, Date fromDate, Date toDate) throws MyException {
-    pathToDirectory = this.getFullStoragePath(pathToDirectory);
+    pathToDirectory=this.getFullStoragePath(pathToDirectory);
     return this.returnFilesInDateInterval(pathToDirectory, fromDate, toDate, false, false);
   }
 
   @Override
   Map<String, FileMetadata> returnModifiedFilesFromDate(String pathToDirectory, Date fromDate) throws MyException {
-    pathToDirectory = this.getFullStoragePath(pathToDirectory);
+    pathToDirectory=this.getFullStoragePath(pathToDirectory);
     return this.returnFilesInDateInterval(pathToDirectory, fromDate, null, false, true);
   }
 
   @Override
   Map<String, FileMetadata> returnModifiedFilesBeforeDate(String pathToDirectory, Date toDate) throws MyException {
-    pathToDirectory = this.getFullStoragePath(pathToDirectory);
+    pathToDirectory=this.getFullStoragePath(pathToDirectory);
     return this.returnFilesInDateInterval(pathToDirectory, null, toDate, false, true);
   }
 

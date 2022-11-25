@@ -62,10 +62,13 @@ public class LocalStorageImplementation extends StorageSpecification {
 
     //ODAVDE SAM JA TESTIRAO
     //A ovde ja
-    /*StorageSpecification storageSpecification=new LocalStorageImplementation();
-    storageSpecification.setRootFolderPathInitialization("C:\\Users\\cvlad\\Desktop\\SKProjekat\\LocalStorageImplementation");
+    StorageSpecification storageSpecification=new LocalStorageImplementation();
+    storageSpecification.setRootFolderPathInitialization("C:\\Users\\mega\\ProjekatSK\\LokalTest");
     storageSpecification.createRootFolder();
-    storageSpecification.createFolderOnSpecifiedPath(".", "cvele");
+    List<String> list=new ArrayList<>();
+    list.add("C:\\Users\\mega\\ProjekatSK\\d.txt");
+    storageSpecification.putFilesOnSpecifiedPath(list,"/Zarko/Vladan");
+    /*storageSpecification.createFolderOnSpecifiedPath(".", "cvele");
     storageSpecification.createFolderOnSpecifiedPath("/cvele", "cvele2");
 //    storageSpecification.mkdirCreateFiles("{1-12}", ".");
 //    storageSpecification.mkdirCreateFiles("{1-10}abc", "/cvele");
@@ -368,8 +371,8 @@ public class LocalStorageImplementation extends StorageSpecification {
       throw new MyException("Action invalid.");
     }
     int fileCount = Objects.requireNonNull(relFile.list()).length;
-    if (super.getConfiguration().getNumberOfFilesInFolder().get(relativePath) != null && fileCount + 1 >
-            super.getConfiguration().getNumberOfFilesInFolder().get(relativePath)) {
+    if (super.getConfiguration().getNumberOfFilesInFolder().get("/"+relativePath) != null && fileCount + 1 >
+            super.getConfiguration().getNumberOfFilesInFolder().get("/"+relativePath)) {
       throw new MyException("Maximum number of files exceeded");
     }
   }

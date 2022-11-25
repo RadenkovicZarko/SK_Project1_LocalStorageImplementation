@@ -782,7 +782,7 @@ public class LocalStorageImplementation extends StorageSpecification {
       throw new MyException("Input format invalid.");
     }
     String inBrackets = input.substring(input.indexOf("{") + 1, input.indexOf("}"));
-    String beforeBrackets = input.substring(0, input.indexOf("{"));
+    String beforeBrackets = input.substring(input.indexOf(" "), input.indexOf("{"));
     String afterBrackets = input.substring(input.indexOf("}") + 1);
     if (inBrackets.length() <= 0 ) {
       throw new MyException("Input format invalid.");

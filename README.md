@@ -1,3 +1,5 @@
+# Local Storage Management Library
+
 The repository hosts a comprehensive Java project aimed at managing local file storage systems. It encapsulates functionalities for creating, configuring, and managing directories and files, including operations like upload, download, deletion, and movement of files within the local storage. Designed with extensibility and ease of use in mind, this project serves as a robust framework for applications requiring efficient local storage management, offering developers a solid base for building or extending their own storage solutions.
 
 This repository showcases a practical example of implementing a specification for local file storage management as part of a software components course. It demonstrates how to create dependencies and configure a project using Maven, offering a hands-on approach to understanding component-based software engineering. This project serves as a clear illustration of applying theoretical concepts in software components to a tangible Java application, emphasizing the importance of modular design and dependency management in modern software development.
